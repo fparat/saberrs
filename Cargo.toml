@@ -1,10 +1,21 @@
 [package]
 name = "saberrs"
+description = "A library for interfacing with Dimension Engineering's Sabertooth motor drivers."
 version = "0.1.0"
 authors = ["Franck Parat <franck.parat@gmail.com>"]
 edition = "2018"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/fparat/saberrs"
+keywords = ["sabertooth", "motor", "robotics"]
+categories = ["embedded", "hardware-support", "science::robotics"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-serialport = "3.3.0"
+[dependencies.serialport]
+version = "3.3.0"
+default-features = false
+
+[dev-dependencies]
+cargo-readme = "3.1.2"
+
