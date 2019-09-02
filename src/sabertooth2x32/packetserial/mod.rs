@@ -89,8 +89,8 @@ pub struct PacketSerial<T: SabertoothSerial> {
 
 impl PacketSerial<SabertoothPort> {
     /// Open a serial port and return a new instance of `PacketSerial` with
-    /// default settings. By default the address is `ADDRESS_DEFAULT` and the protection type
-    /// is `PacketType::Checksum`.
+    /// default settings. By default the address is `128` and the protection
+    /// type is `PacketType::CRC`.
     ///
     /// # Example
     ///
