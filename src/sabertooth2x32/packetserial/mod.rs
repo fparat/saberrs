@@ -1,7 +1,10 @@
 use crate::error::{Error, ErrorKind, Result};
-use crate::port::{SabertoothPort, SabertoothPortShared, SabertoothSerial};
+use crate::port::SabertoothSerial;
 use crate::sabertooth2x32::Sabertooth2x32;
 use crate::utils;
+
+#[cfg(feature="serialport")]
+use crate::port::sabertoothport::{SabertoothPort, SabertoothPortShared};
 
 mod checksum;
 mod crc;

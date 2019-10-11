@@ -2,8 +2,12 @@ use std::str;
 
 use super::Sabertooth2x32;
 use crate::error::{Error, ErrorKind, Result};
-use crate::port::{SabertoothPort, SabertoothPortShared, SabertoothSerial};
+use crate::port::SabertoothSerial;
 use crate::utils;
+use std::convert::From;
+
+#[cfg(feature="serialport")]
+use crate::port::sabertoothport::{SabertoothPort, SabertoothPortShared};
 
 macro_rules! make_cmd_str {
     ($token:expr, $channel:expr, $value:expr) => {
@@ -31,6 +35,7 @@ pub struct PlainText<T: SabertoothSerial> {
     dev: T,
 }
 
+#[cfg(feature="serialport")]
 impl PlainText<SabertoothPort> {
     /// Create a default new "Plain Text" interface.
     pub fn new(port: &str) -> Result<PlainText<SabertoothPort>> {
@@ -99,15 +104,19 @@ impl<T: SabertoothSerial> PlainText<T> {
     }
 }
 
-impl From<SabertoothPort> for PlainText<SabertoothPort> {
-    fn from(dev: SabertoothPort) -> Self {
+// should work with SabertoothPort
+impl<T: SabertoothSerial> From<T> for PlainText<T> {
+    fn from(dev: T) -> Self {
         PlainText { dev }
     }
 }
 
-impl From<&SabertoothPortShared> for PlainText<SabertoothPortShared> {
-    fn from(dev: &SabertoothPortShared) -> Self {
-        PlainText { dev: dev.clone() }
+// should work with SabertoothPortShared
+impl<T> From<&T> for PlainText<T>
+where T: SabertoothSerial + Clone
+{
+    fn from(dev: &T) -> Self {
+        PlainText { dev: (*dev).clone() }
     }
 }
 
@@ -264,4 +273,5 @@ mod tests {
             Some(SplitResponse('S', '2', None, -52))
         );
     }
+
 }

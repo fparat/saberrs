@@ -196,3 +196,13 @@ fn get_temperature() {
     test_get_method!(sabertext, get_temperature, vectors, responder);
     responder.stop();
 }
+
+#[cfg(feature="serialport")]
+#[test]
+fn test_from_serialport() {
+    use saberrs::sabertooth2x32::PlainText;
+    use saberrs::SabertoothPort;
+    let (saber, _) = utils::saberdevice_harness();
+    let plaintext = PlainText::from(saber);
+}
+

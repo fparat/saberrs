@@ -87,7 +87,10 @@
 //! [SabertoothPortShared]: struct.SabertoothPortShared.html
 
 pub use error::{Error, ErrorKind, Result};
-pub use port::{SabertoothPort, SabertoothPortShared, SabertoothSerial};
+pub use port::SabertoothSerial;
+
+#[cfg(feature="serialport")]
+pub use port::sabertoothport::{SabertoothPort, SabertoothPortShared};
 
 #[macro_use]
 mod utils;
