@@ -58,7 +58,7 @@ pub trait SabertoothSerial: io::Write + io::Read {
 /// Optional implementation of a concrete SerialPort. Can be disabled for
 /// cutting the dependency on external crates. Then the trait `SabertoothSerial`
 /// will need to be implemented manually.
-#[cfg(feature="serialport")]
+#[cfg(feature = "serialport")]
 pub mod sabertoothport {
     use super::*;
 
@@ -236,4 +236,3 @@ pub mod sabertoothport {
         }
     }
 }
-

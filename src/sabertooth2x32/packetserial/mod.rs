@@ -3,7 +3,7 @@ use crate::port::SabertoothSerial;
 use crate::sabertooth2x32::Sabertooth2x32;
 use crate::utils;
 
-#[cfg(feature="serialport")]
+#[cfg(feature = "serialport")]
 use crate::port::sabertoothport::{SabertoothPort, SabertoothPortShared};
 
 mod checksum;

@@ -3,7 +3,7 @@ use std::error;
 use std::fmt;
 use std::io;
 
-#[cfg(feature="serialport")]
+#[cfg(feature = "serialport")]
 use serialport;
 
 /// Result type used in the crate.
@@ -13,7 +13,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ErrorKind {
     /// Serial error. Its embedded kind is defined by the `serialport` crate.
-    #[cfg(feature="serialport")]
+    #[cfg(feature = "serialport")]
     Serial(serialport::ErrorKind),
 
     /// Invalid provided input.

@@ -89,7 +89,7 @@
 pub use error::{Error, ErrorKind, Result};
 pub use port::SabertoothSerial;
 
-#[cfg(feature="serialport")]
+#[cfg(feature = "serialport")]
 pub use port::sabertoothport::{SabertoothPort, SabertoothPortShared};
 
 #[macro_use]
