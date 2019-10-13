@@ -6,13 +6,12 @@
 //! # Simple usage
 //!
 //! ```rust
-//! use saberrs::sabertooth2x32;
-//! use saberrs::Result;
-//! use saberrs::sabertooth2x32::Sabertooth2x32;
+//! # use saberrs::Result;
+//! use saberrs::sabertooth2x32::{Sabertooth2x32, PacketSerial};
 //!
 //! # fn example() -> Result<()> {
 //! // Create a handle. This will use "PacketSerial" protocol.
-//! let mut saber = sabertooth2x32::PacketSerial::new("/dev/ttyS0")?;
+//! let mut saber = PacketSerial::new("/dev/ttyS0")?;
 //!
 //! // Go forward at half-speed (50.0%)
 //! saber.set_drive(50.0)?;
@@ -31,46 +30,110 @@
 //! Other protocol variants can be used:
 //!
 //! ```rust
-//!  use saberrs::sabertooth2x32;
-//!  use saberrs::sabertooth2x32::{Sabertooth2x32, PacketType};
-//!  use saberrs::Result;
+//! use saberrs::sabertooth2x32::{Sabertooth2x32, PacketSerial, PacketType, PlainText};
+//! # use saberrs::Result;
 //!
 //! # fn example() -> Result<()> {
 //! // "PacketSerial" with specified address and frame protection type.
-//! let mut saber = sabertooth2x32::PacketSerial::new("/dev/ttyS0")?
+//! let mut saber = PacketSerial::new("/dev/ttyS0")?
 //!     .with_packet_type(PacketType::Checksum)
 //!     .with_address(129);
 //!
 //! // "PlainText" protocol
-//! let mut sabertext = sabertooth2x32::PlainText::new("/dev/ttyS1")?;
+//! let mut sabertext = PlainText::new("/dev/ttyS1")?;
 //! # Ok(())
 //! # }
 //! ```
 //!
-//! # More advanced: serial settings and port sharing
+//! # Customizing the IO: the `SabertoothSerial` trait
 //!
-//! The serial port is encapsulated in a trait [SabertoothSerial], implemented
-//! by [SabertoothPort] and [SabertoothPortShared], which allow to manually
-//! specify some serial port settings (although there are far less options than
-//! a raw serial port), or mix multiple protocols (PacketSerial or PlainText).
+//! The handles rely on the trait [SabertoothSerial], which abstract the
+//! low-level IO communication with the device.
 //!
-//! # License
+//! By default, the library provides [SabertoothPort] and
+//! [SabertoothPortShared]. In most cases the application writer shouldn't need
+//! to care about those, but they may be used for applying custom baud rates or
+//! timeout values for example.
 //!
-//! Licensed under either of
+//! [SabertoothSerial] can be implemented manually for even more customization.
+//! For example stubs can be implemented for debugging purpose:
 //!
-//! * Apache License, Version 2.0
-//! ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-//! * MIT license
-//! ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+//! ```rust
+//! use std::time::Duration;
+//! use std::io::{self, Read, Write};
+//! use saberrs::{SabertoothSerial};
 //!
-//! at your option.
+//! struct SerialStub {
+//!     timeout: Duration,
+//!     baudrate: u32,
+//! }
 //!
-//! # Contribution
+//! impl SerialStub {
+//!     pub fn new() -> Self {
+//!         SerialStub {
+//!             timeout: Duration::from_millis(100),
+//!             baudrate: 9600,
+//!         }
+//!     }
+//! }
 //!
-//! Unless you explicitly state otherwise, any contribution intentionally submitted
-//! for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
-//! dual licensed as above, without any additional terms or conditions.
+//! impl Read for SerialStub {
+//!     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+//!         println!("SerialStub.read()");
+//!         Ok(0)
+//!     }
+//! }
 //!
+//! impl Write for SerialStub {
+//!     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+//!         println!("SerialStub.write({:?})", buf);
+//!         Ok(buf.len())
+//!     }
+//!
+//!     fn flush(&mut self) -> io::Result<()> { Ok(()) }
+//! }
+//!
+//! impl SabertoothSerial for SerialStub {
+//!     fn set_timeout(&mut self, timeout: Duration) -> saberrs::Result<()> {
+//!         println!("SerialStub.set_timeout({:?})", timeout);
+//!         self.timeout = timeout;
+//!         Ok(())
+//!     }
+//!
+//!     fn timeout(&self) -> Duration {
+//!         println!("SerialStub.timeout() -> {:?}", self.timeout);
+//!         self.timeout
+//!     }
+//!
+//!     fn set_baud_rate(&mut self, baud_rate: u32) -> saberrs::Result<()> {
+//!         println!("SerialStub.set_baudrate({})", baud_rate);
+//!         self.baudrate = baud_rate;
+//!         Ok(())
+//!     }
+//!
+//!     fn baud_rate(&self) -> saberrs::Result<u32> {
+//!         println!("SerialStub.baud_rate() -> {}", self.baudrate);
+//!         Ok(self.baudrate)
+//!     }
+//!
+//!     fn clear_all(&self) -> saberrs::Result<()> { Ok(()) }
+//! }
+//! ```
+//!
+//!
+//! # Features and dependencies
+//! 
+//! Features:
+//! 
+//! - `serialport`, enabled by default, allows the usage of the crate
+//! [serialport] for providing [SabertoothPort] and [SabertoothPortShared]. 
+//! If this feature is disabled [SabertoothSerial] needs to be implemented
+//! manually.
+//!
+//! Dependencies:
+//!
+//! - [serialport] for the `serialport` feature.
+//! - [log] for emitting logs.
 //!
 //! # Disclaimer
 //!
@@ -85,6 +148,8 @@
 //! [SabertoothSerial]: trait.SabertoothSerial.html
 //! [SabertoothPort]: struct.SabertoothPort.html
 //! [SabertoothPortShared]: struct.SabertoothPortShared.html
+//! [serialport]: https://crates.io/crates/serialport
+//! [log]: https://crates.io/crates/log
 
 pub use error::{Error, ErrorKind, Result};
 pub use port::SabertoothSerial;
