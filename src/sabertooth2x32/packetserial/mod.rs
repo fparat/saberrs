@@ -91,6 +91,7 @@ pub struct PacketSerial<T: SabertoothSerial> {
     packet_type: PacketType,
 }
 
+#[cfg(feature = "serialport")]
 impl PacketSerial<SabertoothPort> {
     /// Open a serial port and return a new instance of `PacketSerial` with
     /// default settings. By default the address is `128` and the protection

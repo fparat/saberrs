@@ -1,15 +1,7 @@
-use std::cell::RefCell;
 use std::io;
-use std::rc::Rc;
 use std::time::Duration;
 
 use crate::error::Result;
-
-/// Default baud rate setting when opening a `SabertoothPort`.
-const DEFAULT_BAUDRATE: u32 = 9600;
-
-/// Default timeout setting when opening a `SabertoothPort`.
-const DEFAULT_TIMEOUT_MS: u64 = 100;
 
 /// Minimal serial port trait.
 ///
@@ -55,16 +47,29 @@ pub trait SabertoothSerial: io::Write + io::Read {
     fn clear_all(&self) -> Result<()>;
 }
 
-/// Optional implementation of a concrete SerialPort. Can be disabled for
-/// cutting the dependency on external crates. Then the trait `SabertoothSerial`
-/// will need to be implemented manually.
+/// `SabertoothPort` and `SabertoothPortShared` are optional concrete
+/// implementations of the trait `SabertoothSerial`. Thay can be disabled for
+/// cutting the dependency on the `serialport` external crate.
+/// In this case the trait `SabertoothSerial` will need to be implemented
+/// manually by the application.
 #[cfg(feature = "serialport")]
 pub mod sabertoothport {
-    use super::*;
+    use std::cell::RefCell;
+    use std::io;
+    use std::rc::Rc;
+    use std::time::Duration;
 
     use serialport;
     use serialport::{ClearBuffer, DataBits, FlowControl, Parity, StopBits};
     use serialport::{SerialPort, SerialPortSettings};
+
+    use crate::{Result, SabertoothSerial};
+
+    /// Default baud rate setting when opening a `SabertoothPort`.
+    const DEFAULT_BAUDRATE: u32 = 9600;
+
+    /// Default timeout setting when opening a `SabertoothPort`.
+    const DEFAULT_TIMEOUT_MS: u64 = 100;
 
     /// Default serial settings.
     const DEFAULT_SETTINGS: SerialPortSettings = SerialPortSettings {
@@ -80,6 +85,8 @@ pub mod sabertoothport {
     ///
     /// It is a simple wrapper around a serial port handle and may be used for
     /// manually write and read bytes with the device.
+    /// 
+    /// **Requires** the "serialport" feature (enabled by default).
     pub struct SabertoothPort {
         dev: Box<dyn SerialPort>,
     }
@@ -170,6 +177,8 @@ pub mod sabertoothport {
     /// # Ok(())
     /// # }
     /// ```
+    /// 
+    /// **Requires** the "serialport" feature (enabled by default).
     #[derive(Clone)]
     pub struct SabertoothPortShared {
         dev: Rc<RefCell<Box<dyn SerialPort>>>,

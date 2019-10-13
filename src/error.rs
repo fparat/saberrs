@@ -12,9 +12,8 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// Types of errors.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ErrorKind {
-    /// Serial error. Its embedded kind is defined by the `serialport` crate.
-    #[cfg(feature = "serialport")]
-    Serial(serialport::ErrorKind),
+    /// IO error
+    Io(io::ErrorKind),
 
     /// Invalid provided input.
     InvalidInput,
@@ -23,11 +22,18 @@ pub enum ErrorKind {
     Response,
 
     Unknwown,
+
+    /// Serial error. Its embedded kind is defined by the `serialport` crate.
+    #[cfg(feature = "serialport")]
+    Serial(serialport::ErrorKind),
 }
 
 #[derive(Debug)]
 enum SubError {
     None,
+    Io(io::Error),
+
+    #[cfg(feature = "serialport")]
     Serial(serialport::Error),
 }
 
@@ -61,6 +67,7 @@ impl error::Error for Error {
 
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         match &self.source {
+            #[cfg(feature = "serialport")]
             SubError::Serial(err) => Some(err),
             _ => None,
         }
@@ -73,6 +80,7 @@ impl fmt::Display for Error {
     }
 }
 
+#[cfg(feature = "serialport")]
 impl From<serialport::Error> for Error {
     fn from(err: serialport::Error) -> Error {
         Error {
@@ -83,6 +91,7 @@ impl From<serialport::Error> for Error {
     }
 }
 
+#[cfg(feature = "serialport")]
 impl From<Error> for serialport::Error {
     fn from(err: Error) -> serialport::Error {
         let kind = match err.kind {
@@ -95,6 +104,10 @@ impl From<Error> for serialport::Error {
 
 impl From<io::Error> for Error {
     fn from(err: io::Error) -> Error {
-        Error::from(serialport::Error::from(err))
+        Error {
+            kind: ErrorKind::Io(err.kind()),
+            description: err.to_string(),
+            source: SubError::Io(err),
+        }
     }
 }
