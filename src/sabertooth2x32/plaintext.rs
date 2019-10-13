@@ -1,13 +1,15 @@
+use std::convert::From;
 use std::str;
+
+use log::debug;
 
 use super::Sabertooth2x32;
 use crate::error::{Error, ErrorKind, Result};
 use crate::port::SabertoothSerial;
 use crate::utils;
-use std::convert::From;
 
 #[cfg(feature = "serialport")]
-use crate::port::sabertoothport::{SabertoothPort, SabertoothPortShared};
+use crate::port::sabertoothport::SabertoothPort;
 
 macro_rules! make_cmd_str {
     ($token:expr, $channel:expr, $value:expr) => {
@@ -18,10 +20,11 @@ macro_rules! make_cmd_str {
 #[cfg(debug_assertions)]
 macro_rules! dbg_frame {
     ($head:ident, $frame:expr) => {
-        let $head = std::str::from_utf8($frame)
+        let frame = std::str::from_utf8($frame)
             .unwrap_or("<decode error>")
-            .trim_matches(char::from(0));
-        dbg!($head);
+            .trim_matches(char::from(0))
+            .trim(); // avoid empty lines caused by '\n' in logs
+        debug!("{} = {}", stringify!($head), frame);
     };
 }
 

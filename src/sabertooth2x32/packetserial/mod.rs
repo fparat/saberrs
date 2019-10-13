@@ -1,10 +1,12 @@
+use log::debug;
+
 use crate::error::{Error, ErrorKind, Result};
 use crate::port::SabertoothSerial;
 use crate::sabertooth2x32::Sabertooth2x32;
 use crate::utils;
 
 #[cfg(feature = "serialport")]
-use crate::port::sabertoothport::{SabertoothPort, SabertoothPortShared};
+use crate::port::sabertoothport::SabertoothPort;
 
 mod checksum;
 mod crc;
@@ -12,8 +14,7 @@ mod crc;
 #[cfg(debug_assertions)]
 macro_rules! dbg_frame {
     ($head:ident, $frame:expr) => {
-        let $head = format!("{:02X?} ({:?})", $frame, $frame);
-        dbg!($head);
+        debug!("{} = {:?}", stringify!($head), $frame);
     };
 }
 

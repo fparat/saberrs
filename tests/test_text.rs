@@ -201,7 +201,6 @@ fn get_temperature() {
 #[test]
 fn test_from_serialport() {
     use saberrs::sabertooth2x32::PlainText;
-    use saberrs::SabertoothPort;
     let (saber, _) = utils::saberdevice_harness();
-    let plaintext = PlainText::from(saber);
+    let _ = PlainText::from(saber);
 }
