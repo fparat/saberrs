@@ -1,19 +1,30 @@
 # saberrs
 
+[![crates.io version badge](https://img.shields.io/crates/v/saberrs.svg)](https://crates.io/crates/saberrs)
+[![Documentation](https://docs.rs/saberrs/badge.svg)](https://docs.rs/crate/saberrs)
+![License](https://img.shields.io/crates/l/log.svg)
+
 `saberrs` is a library for interfacing with [Dimension Engineering]
 Sabertooth motor driver.
 
 Currently only the Sabertooth 2x32 is supported.
 
+Full documentation: https://docs.rs/crate/saberrs
+
 ## Simple usage
 
+In `Cargo.toml`:
+
+```toml
+[dependencies]
+saberrs = "0.2"
+```
+
 ```rust
-use saberrs::sabertooth2x32;
-use saberrs::Result;
-use saberrs::sabertooth2x32::Sabertooth2x32;
+use saberrs::sabertooth2x32::{Sabertooth2x32, PacketSerial};
 
 // Create a handle. This will use "PacketSerial" protocol.
-let mut saber = sabertooth2x32::PacketSerial::new("/dev/ttyS0")?;
+let mut saber = PacketSerial::new("/dev/ttyS0")?;
 
 // Go forward at half-speed (50.0%)
 saber.set_drive(50.0)?;
@@ -30,25 +41,30 @@ saber.stop_motors()?;
 Other protocol variants can be used:
 
 ```rust
- use saberrs::sabertooth2x32;
- use saberrs::sabertooth2x32::{Sabertooth2x32, PacketType};
- use saberrs::Result;
+use saberrs::sabertooth2x32::{Sabertooth2x32, PacketSerial, PacketType, PlainText};
 
 // "PacketSerial" with specified address and frame protection type.
-let mut saber = sabertooth2x32::PacketSerial::new("/dev/ttyS0")?
+let mut saber = PacketSerial::new("/dev/ttyS0")?
     .with_packet_type(PacketType::Checksum)
     .with_address(129);
 
 // "PlainText" protocol
-let mut sabertext = sabertooth2x32::PlainText::new("/dev/ttyS1")?;
+let mut sabertext = PlainText::new("/dev/ttyS1")?;
 ```
 
-## More advanced: serial settings and port sharing
+## Features and dependencies
 
-The serial port is encapsulated in a trait [SabertoothSerial], implemented
-by [SabertoothPort] and [SabertoothPortShared], which allow to manually
-specify some serial port settings (although there are far less options than
-a raw serial port), or mix multiple protocols (PacketSerial or PlainText).
+Features:
+
+- `serialport`, enabled by default, allows the usage of the crate
+[serialport] for providing [SabertoothPort] and [SabertoothPortShared].
+If this feature is disabled [SabertoothSerial] needs to be implemented
+manually.
+
+Dependencies:
+
+- [serialport] for the `serialport` feature.
+- [log] for emitting logs.
 
 ## License
 
@@ -77,9 +93,5 @@ their respective holders. Use of them does not imply any affiliation with or
 endorsement by them.
 
 [Dimension Engineering]: https://www.dimensionengineering.com
-[Sabertooth 2x32]: https://www.dimensionengineering.com/products/sabertooth2x32
-[SabertoothSerial]: trait.SabertoothSerial.html
-[SabertoothPort]: struct.SabertoothPort.html
-[SabertoothPortShared]: struct.SabertoothPortShared.html
 
 License: MIT OR Apache-2.0
