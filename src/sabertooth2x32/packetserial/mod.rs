@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use log::debug;
 
 use crate::error::{Error, ErrorKind, Result};

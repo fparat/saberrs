@@ -1,6 +1,7 @@
 use std::convert::From;
 use std::str;
 
+#[allow(unused_imports)]
 use log::debug;
 
 use super::Sabertooth2x32;
