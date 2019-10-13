@@ -1,7 +1,7 @@
 # saberrs
 
 [![crates.io version badge](https://img.shields.io/crates/v/saberrs.svg)](https://crates.io/crates/saberrs)
-[![Documentation](https://docs.rs/saberrs/badge.svg)](https://docs.rs/crate/saberrs)
+[![Documentation](https://docs.rs/saberrs/badge.svg)](https://docs.rs/saberrs)
 ![License](https://img.shields.io/crates/l/log.svg)
 
 `saberrs` is a library for interfacing with [Dimension Engineering]
@@ -9,7 +9,7 @@ Sabertooth motor driver.
 
 Currently only the Sabertooth 2x32 is supported.
 
-Full documentation: https://docs.rs/crate/saberrs
+Full documentation: https://docs.rs/saberrs
 
 ## Simple usage
 
@@ -19,6 +19,8 @@ In `Cargo.toml`:
 [dependencies]
 saberrs = "0.2"
 ```
+
+In application code:
 
 ```rust
 use saberrs::sabertooth2x32::{Sabertooth2x32, PacketSerial};
@@ -56,10 +58,7 @@ let mut sabertext = PlainText::new("/dev/ttyS1")?;
 
 Features:
 
-- `serialport`, enabled by default, allows the usage of the crate
-[serialport] for providing [SabertoothPort] and [SabertoothPortShared].
-If this feature is disabled [SabertoothSerial] needs to be implemented
-manually.
+- `serialport`, enabled by default, for providing default serial IO handlers.
 
 Dependencies:
 
@@ -93,5 +92,5 @@ their respective holders. Use of them does not imply any affiliation with or
 endorsement by them.
 
 [Dimension Engineering]: https://www.dimensionengineering.com
-
-License: MIT OR Apache-2.0
+[serialport]: https://crates.io/crates/serialport
+[log]: https://crates.io/crates/log
