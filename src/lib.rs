@@ -122,11 +122,11 @@
 //!
 //!
 //! # Features and dependencies
-//! 
+//!
 //! Features:
-//! 
+//!
 //! - `serialport`, enabled by default, allows the usage of the crate
-//! [serialport] for providing [SabertoothPort] and [SabertoothPortShared]. 
+//! [serialport] for providing [SabertoothPort] and [SabertoothPortShared].
 //! If this feature is disabled [SabertoothSerial] needs to be implemented
 //! manually.
 //!

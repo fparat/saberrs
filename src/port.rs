@@ -85,7 +85,7 @@ pub mod sabertoothport {
     ///
     /// It is a simple wrapper around a serial port handle and may be used for
     /// manually write and read bytes with the device.
-    /// 
+    ///
     /// **Requires** the "serialport" feature (enabled by default).
     pub struct SabertoothPort {
         dev: Box<dyn SerialPort>,
@@ -177,7 +177,7 @@ pub mod sabertoothport {
     /// # Ok(())
     /// # }
     /// ```
-    /// 
+    ///
     /// **Requires** the "serialport" feature (enabled by default).
     #[derive(Clone)]
     pub struct SabertoothPortShared {
