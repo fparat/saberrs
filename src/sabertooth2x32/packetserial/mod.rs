@@ -235,8 +235,8 @@ impl<T: SabertoothSerial> PacketSerial<T> {
     }
 }
 
-impl From<SabertoothPort> for PacketSerial<SabertoothPort> {
-    fn from(dev: SabertoothPort) -> Self {
+impl<T: SabertoothSerial> From<T> for PacketSerial<T> {
+    fn from(dev: T) -> Self {
         PacketSerial {
             dev,
             address: DEFAULT_ADDRESS,
@@ -245,8 +245,11 @@ impl From<SabertoothPort> for PacketSerial<SabertoothPort> {
     }
 }
 
-impl From<&SabertoothPortShared> for PacketSerial<SabertoothPortShared> {
-    fn from(dev: &SabertoothPortShared) -> Self {
+impl<T> From<&T> for PacketSerial<T>
+where
+    T: SabertoothSerial + Clone,
+{
+    fn from(dev: &T) -> Self {
         PacketSerial {
             dev: dev.clone(),
             address: DEFAULT_ADDRESS,
