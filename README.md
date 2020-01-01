@@ -3,6 +3,7 @@
 [![crates.io version badge](https://img.shields.io/crates/v/saberrs.svg)](https://crates.io/crates/saberrs)
 [![Documentation](https://docs.rs/saberrs/badge.svg)](https://docs.rs/saberrs)
 ![License](https://img.shields.io/crates/l/log.svg)
+![CI](https://github.com/fparat/saberrs/workflows/Rust/badge.svg)
 
 `saberrs` is a library for interfacing with [Dimension Engineering]
 Sabertooth motor driver.
