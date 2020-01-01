@@ -163,7 +163,7 @@ fn get_voltage() {
     #[rustfmt::skip]
     let vectors = [
         (1, b"M1: getb\r\n".to_vec(), b"M1: B125\r\n".to_vec(), 12.5),
-        (2, b"M2: getb\r\n".to_vec(), b"M2: B240\r\n".to_vec(), 24.0),
+        (2, b"M2: getb\r\n".to_vec(), b"M2:B240\r\n".to_vec(), 24.0),
     ];
 
     let (mut sabertext, responder) = utils::sabertext_responder_harness();

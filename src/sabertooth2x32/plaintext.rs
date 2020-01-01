@@ -99,10 +99,17 @@ impl<T: SabertoothSerial> PlainText<T> {
     fn get_value(&mut self, token: char, ch: char, prefix: Option<char>, req: &str) -> Result<i32> {
         let cmdstr = make_cmd_str!(token, ch, req);
         let mut rxbuf = [0u8; 32];
-        self.request(cmdstr.as_bytes(), &mut rxbuf)?;
-        let splitted = split_response(&rxbuf)?;
+        let size = self.request(cmdstr.as_bytes(), &mut rxbuf)?;
+        let resp = &rxbuf[..size];
+        let splitted = split_response(&resp)?;
         if splitted.0 != token || splitted.1 != ch || splitted.2 != prefix {
-            return Err(Error::new(ErrorKind::Response, "Invalid response"));
+            let expected = format!("{}{}: {}<value>", token, splitted.1, prefix.unwrap_or(' '));
+            let received = String::from_utf8(resp.to_vec()).unwrap_or(format!("{:?}", resp));
+            let descr = format!(
+                "Invalid response: expected the form {:?} but received {:?}",
+                &expected, received
+            );
+            return Err(Error::new(ErrorKind::Response, &descr));
         }
         Ok(splitted.3)
     }
