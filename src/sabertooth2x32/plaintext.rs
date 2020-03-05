@@ -76,13 +76,13 @@ impl<T: SabertoothSerial> PlainText<T> {
         Ok(count)
     }
 
-    fn send_percent_to_channel(&mut self, token: char, channel: usize, percent: f32) -> Result<()> {
+    fn send_ratio_to_channel(&mut self, token: char, channel: usize, ratio: f32) -> Result<()> {
         let channel = match_channel_to!(channel, '1', '2');
-        self.send_percent(token, channel, percent)
+        self.send_ratio(token, channel, ratio)
     }
 
-    fn send_percent(&mut self, token: char, channel: char, percent: f32) -> Result<()> {
-        let value = utils::percent_to_value(percent)?;
+    fn send_ratio(&mut self, token: char, channel: char, ratio: f32) -> Result<()> {
+        let value = utils::ratio_to_value(ratio)?;
         let cmdstr = make_cmd_str!(token, channel, value);
         let buf = cmdstr.as_bytes();
         self.write_frame(buf)
@@ -148,40 +148,40 @@ impl<T: SabertoothSerial> Sabertooth2x32 for PlainText<T> {
         Ok(())
     }
 
-    fn set_speed(&mut self, channel: usize, percent: f32) -> Result<()> {
-        self.send_percent_to_channel('M', channel, percent)
+    fn set_speed(&mut self, channel: usize, ratio: f32) -> Result<()> {
+        self.send_ratio_to_channel('M', channel, ratio)
     }
 
     fn get_speed(&mut self, channel: usize) -> Result<f32> {
         let ch = match_channel_to!(channel, '1', '2');
         let value = self.get_value('M', ch, None, "get")?;
-        Ok(utils::value_to_percent(value))
+        Ok(utils::value_to_ratio(value))
     }
 
-    fn set_drive(&mut self, percent: f32) -> Result<()> {
-        self.send_percent('M', 'D', percent)
+    fn set_drive(&mut self, ratio: f32) -> Result<()> {
+        self.send_ratio('M', 'D', ratio)
     }
 
-    fn set_turn(&mut self, percent: f32) -> Result<()> {
-        self.send_percent('M', 'T', percent)
+    fn set_turn(&mut self, ratio: f32) -> Result<()> {
+        self.send_ratio('M', 'T', ratio)
     }
 
-    fn set_power(&mut self, channel: usize, percent: f32) -> Result<()> {
-        self.send_percent_to_channel('P', channel, percent)
+    fn set_power(&mut self, channel: usize, ratio: f32) -> Result<()> {
+        self.send_ratio_to_channel('P', channel, ratio)
     }
 
     fn get_power(&mut self, channel: usize) -> Result<f32> {
         let ch = match_channel_to!(channel, '1', '2');
         let value = self.get_value('P', ch, None, "get")?;
-        Ok(utils::value_to_percent(value))
+        Ok(utils::value_to_ratio(value))
     }
 
-    fn set_ramp(&mut self, channel: usize, percent: f32) -> Result<()> {
-        self.send_percent_to_channel('R', channel, percent)
+    fn set_ramp(&mut self, channel: usize, ratio: f32) -> Result<()> {
+        self.send_ratio_to_channel('R', channel, ratio)
     }
 
-    fn set_aux(&mut self, channel: usize, percent: f32) -> Result<()> {
-        self.send_percent_to_channel('Q', channel, percent)
+    fn set_aux(&mut self, channel: usize, ratio: f32) -> Result<()> {
+        self.send_ratio_to_channel('Q', channel, ratio)
     }
 
     fn get_voltage(&mut self, channel: usize) -> Result<f32> {

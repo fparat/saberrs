@@ -16,15 +16,15 @@ macro_rules! match_channel_to {
     };
 }
 
-pub fn percent_to_value(percent: f32) -> Result<i32> {
-    if percent > 100.0 || percent < -100.0 {
+pub fn ratio_to_value(ratio: f32) -> Result<i32> {
+    if ratio > 1.0 || ratio < -1.0 {
         return Err(Error::new(
             ErrorKind::InvalidInput,
-            format!("Percentage value ({}) out of range -100.0~100.0", percent),
+            format!("Value ({}) out of range -1.0~1.0", ratio),
         ));
     }
 
-    let value = (percent * RANGE_MAX as f32 / 100.0) as i32;
+    let value = (ratio * RANGE_MAX as f32) as i32;
 
     if value > RANGE_MAX {
         Ok(RANGE_MAX)
@@ -35,6 +35,6 @@ pub fn percent_to_value(percent: f32) -> Result<i32> {
     }
 }
 
-pub fn value_to_percent(value: i32) -> f32 {
-    value as f32 / RANGE_MAX as f32 * 100.0
+pub fn value_to_ratio(value: i32) -> f32 {
+    value as f32 / RANGE_MAX as f32
 }

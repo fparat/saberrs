@@ -36,14 +36,14 @@ fn shutdown() {
 #[test]
 fn set_speed() {
     let vectors = [
-        (1, -100.0, b"M1: -2047\r\n".to_vec()),
-        (2, -50.0, b"M2: -1023\r\n".to_vec()),
-        (2, -20.0, b"M2: -409\r\n".to_vec()),
+        (1, -1.0, b"M1: -2047\r\n".to_vec()),
+        (2, -0.5, b"M2: -1023\r\n".to_vec()),
+        (2, -0.2, b"M2: -409\r\n".to_vec()),
         (1, 0.0, b"M1: 0\r\n".to_vec()),
-        (1, 25.0, b"M1: 511\r\n".to_vec()),
-        (2, 50.0, b"M2: 1023\r\n".to_vec()),
-        (1, 75.0, b"M1: 1535\r\n".to_vec()),
-        (2, 100.0, b"M2: 2047\r\n".to_vec()),
+        (1, 0.25, b"M1: 511\r\n".to_vec()),
+        (2, 0.5, b"M2: 1023\r\n".to_vec()),
+        (1, 0.75, b"M1: 1535\r\n".to_vec()),
+        (2, 1.0, b"M2: 2047\r\n".to_vec()),
     ];
 
     let (mut sabertext, mut tty) = utils::sabertext_harness();
@@ -56,8 +56,8 @@ fn set_speed_errs() {
     let (mut sabertext, tty) = utils::sabertext_harness();
     sabertext.set_speed(0, 0.0).expect_err("Channel <1 should fail");
     sabertext.set_speed(3, 0.0).expect_err("Channel >2 should fail");
-    sabertext.set_speed(1, 100.01).expect_err("Values >100.0 should fail");
-    sabertext.set_speed(1, -100.01).expect_err("Values <-100.0 should fail");
+    sabertext.set_speed(1, 1.0001).expect_err("Values >1.000 should fail");
+    sabertext.set_speed(1, -1.0001).expect_err("Values <-1.000 should fail");
 
     // nothing should have been sent over serial
     assert_eq!(0, tty.bytes_to_read().unwrap());
@@ -66,8 +66,8 @@ fn set_speed_errs() {
 #[test]
 fn set_drive() {
     let vectors = [
-        (-50.0, b"MD: -1023\r\n".to_vec()),
-        (100.0, b"MD: 2047\r\n".to_vec()),
+        (-0.5, b"MD: -1023\r\n".to_vec()),
+        (1.000, b"MD: 2047\r\n".to_vec()),
     ];
 
     let (mut sabertext, mut tty) = utils::sabertext_harness();
@@ -77,8 +77,8 @@ fn set_drive() {
 #[test]
 fn set_turn() {
     let vectors = [
-        (-100.0, b"MT: -2047\r\n".to_vec()),
-        (25.0, b"MT: 511\r\n".to_vec()),
+        (-1.000, b"MT: -2047\r\n".to_vec()),
+        (0.25, b"MT: 511\r\n".to_vec()),
     ];
     let (mut sabertext, mut tty) = utils::sabertext_harness();
     test_set_method_no_channel!(sabertext, set_turn, vectors, tty);
@@ -87,13 +87,13 @@ fn set_turn() {
 #[test]
 fn set_power() {
     let vectors = [
-        (1, -100.0, b"P1: -2047\r\n".to_vec()),
-        (2, -50.0, b"P2: -1023\r\n".to_vec()),
+        (1, -1.000, b"P1: -2047\r\n".to_vec()),
+        (2, -0.5, b"P2: -1023\r\n".to_vec()),
         (1, 0.0, b"P1: 0\r\n".to_vec()),
-        (1, 25.0, b"P1: 511\r\n".to_vec()),
-        (2, 50.0, b"P2: 1023\r\n".to_vec()),
-        (1, 75.0, b"P1: 1535\r\n".to_vec()),
-        (2, 100.0, b"P2: 2047\r\n".to_vec()),
+        (1, 0.25, b"P1: 511\r\n".to_vec()),
+        (2, 0.5, b"P2: 1023\r\n".to_vec()),
+        (1, 0.75, b"P1: 1535\r\n".to_vec()),
+        (2, 1.000, b"P2: 2047\r\n".to_vec()),
     ];
 
     let (mut sabertext, mut tty) = utils::sabertext_harness();
@@ -103,13 +103,13 @@ fn set_power() {
 #[test]
 fn set_ramp() {
     let vectors = [
-        (1, -100.0, b"R1: -2047\r\n".to_vec()),
-        (2, -50.0, b"R2: -1023\r\n".to_vec()),
+        (1, -1.000, b"R1: -2047\r\n".to_vec()),
+        (2, -0.5, b"R2: -1023\r\n".to_vec()),
         (1, 0.0, b"R1: 0\r\n".to_vec()),
-        (1, 25.0, b"R1: 511\r\n".to_vec()),
-        (2, 50.0, b"R2: 1023\r\n".to_vec()),
-        (1, 75.0, b"R1: 1535\r\n".to_vec()),
-        (2, 100.0, b"R2: 2047\r\n".to_vec()),
+        (1, 0.25, b"R1: 511\r\n".to_vec()),
+        (2, 0.5, b"R2: 1023\r\n".to_vec()),
+        (1, 0.75, b"R1: 1535\r\n".to_vec()),
+        (2, 1.000, b"R2: 2047\r\n".to_vec()),
     ];
 
     let (mut sabertext, mut tty) = utils::sabertext_harness();
@@ -119,13 +119,13 @@ fn set_ramp() {
 #[test]
 fn set_aux() {
     let vectors = [
-        (1, -100.0, b"Q1: -2047\r\n".to_vec()),
-        (2, -50.0, b"Q2: -1023\r\n".to_vec()),
+        (1, -1.000, b"Q1: -2047\r\n".to_vec()),
+        (2, -0.5, b"Q2: -1023\r\n".to_vec()),
         (1, 0.0, b"Q1: 0\r\n".to_vec()),
-        (1, 25.0, b"Q1: 511\r\n".to_vec()),
-        (2, 50.0, b"Q2: 1023\r\n".to_vec()),
-        (1, 75.0, b"Q1: 1535\r\n".to_vec()),
-        (2, 100.0, b"Q2: 2047\r\n".to_vec()),
+        (1, 0.25, b"Q1: 511\r\n".to_vec()),
+        (2, 0.5, b"Q2: 1023\r\n".to_vec()),
+        (1, 0.75, b"Q1: 1535\r\n".to_vec()),
+        (2, 1.000, b"Q2: 2047\r\n".to_vec()),
     ];
 
     let (mut sabertext, mut tty) = utils::sabertext_harness();
@@ -136,8 +136,8 @@ fn set_aux() {
 fn get_speed() {
     #[rustfmt::skip]
     let vectors = [
-        (1, b"M1: get\r\n".to_vec(), b"M1: 1256\r\n".to_vec(), 61.358),
-        (2, b"M2: get\r\n".to_vec(), b"M2: -2047\r\n".to_vec(), -100.0),
+        (1, b"M1: get\r\n".to_vec(), b"M1: 1256\r\n".to_vec(), 0.61358),
+        (2, b"M2: get\r\n".to_vec(), b"M2: -2047\r\n".to_vec(), -1.000),
     ];
 
     let (mut sabertext, responder) = utils::sabertext_responder_harness();
@@ -149,8 +149,8 @@ fn get_speed() {
 fn get_power() {
     #[rustfmt::skip]
     let vectors = [
-        (1, b"P1: get\r\n".to_vec(), b"P1: -1000\r\n".to_vec(), -48.852),
-        (2, b"P2: get\r\n".to_vec(), b"P2: 2047\r\n".to_vec(), 100.0),
+        (1, b"P1: get\r\n".to_vec(), b"P1: -1000\r\n".to_vec(), -0.48852),
+        (2, b"P2: get\r\n".to_vec(), b"P2: 2047\r\n".to_vec(), 1.000),
     ];
 
     let (mut sabertext, responder) = utils::sabertext_responder_harness();

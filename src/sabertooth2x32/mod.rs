@@ -17,9 +17,9 @@ pub trait Sabertooth2x32 {
     fn shutdown(&mut self, channel: usize) -> Result<()>;
 
     /// Set the speed of the selected motor.
-    /// *channel* is 1 or 2, *percent* is a percentage between -100.0 for full
-    /// backward and 100.0 for full forward (so 0.0 stops the motor).
-    fn set_speed(&mut self, channel: usize, percent: f32) -> Result<()>;
+    /// *channel* is 1 or 2, *ratio* is a ratio between -1.0 for full
+    /// backward and 1.0 for full forward (so 0.0 stops the motor).
+    fn set_speed(&mut self, channel: usize, ratio: f32) -> Result<()>;
 
     /// Get the current speed of the motor. See set_motor() for the values range.
     fn get_speed(&mut self, channel: usize) -> Result<f32>;
@@ -31,30 +31,30 @@ pub trait Sabertooth2x32 {
         Ok(())
     }
 
-    /// Set the drive. *percent* is a percentage between -100.0 for full backward
-    /// and 100.0 for full forward.
+    /// Set the drive. *ratio* is a ratio between -1.0 for full backward
+    /// and 1.0 for full forward.
     /// Note: Both set_drive() and set_turn() must have been set at least once
     /// for having an effect.
-    fn set_drive(&mut self, percent: f32) -> Result<()>;
+    fn set_drive(&mut self, ratio: f32) -> Result<()>;
 
-    /// Set the turn value. *percent* is a percentage between -100.0 for full
-    /// left and 100.0 for full right.
+    /// Set the turn value. *ratio* is a ratio between -1.0 for full
+    /// left and 1.0 for full right.
     /// Note: Both set_drive() and set_turn() must have been set at least once
     /// for having an effect.
-    fn set_turn(&mut self, percent: f32) -> Result<()>;
+    fn set_turn(&mut self, ratio: f32) -> Result<()>;
 
     /// Set the power output of the selected motor. *channel* is 1 or 2, and
-    /// *percent* is a percentage between -100.0 and 100.0.
-    fn set_power(&mut self, channel: usize, percent: f32) -> Result<()>;
+    /// *ratio* is a ratio between -1.0 and 1.0.
+    fn set_power(&mut self, channel: usize, ratio: f32) -> Result<()>;
 
     /// Return the current power output of the motor. *channel* is 1 or 2, and
-    /// the returned value is a percentage between -100.0 and 100.0.
+    /// the returned value is a ratio between -1.0 and 1.0.
     fn get_power(&mut self, channel: usize) -> Result<f32>;
 
     /// Set the speed ramping of the motor.
-    fn set_ramp(&mut self, channel: usize, percent: f32) -> Result<()>;
+    fn set_ramp(&mut self, channel: usize, ratio: f32) -> Result<()>;
 
-    fn set_aux(&mut self, channel: usize, percent: f32) -> Result<()>;
+    fn set_aux(&mut self, channel: usize, ratio: f32) -> Result<()>;
 
     /// Get the battery voltage on the selected motor, in volts.
     fn get_voltage(&mut self, channel: usize) -> Result<f32>;

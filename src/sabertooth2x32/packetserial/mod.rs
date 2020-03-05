@@ -161,8 +161,8 @@ impl<T: SabertoothSerial> PacketSerial<T> {
         self.write_frame(packet.as_ref())
     }
 
-    fn set_percent(&mut self, percent: f32, target: [u8; 2]) -> Result<()> {
-        let value = utils::percent_to_value(percent)?;
+    fn set_ratio(&mut self, ratio: f32, target: [u8; 2]) -> Result<()> {
+        let value = utils::ratio_to_value(ratio)?;
         self.set(CommandSet::Value, value, target)
     }
 
@@ -231,10 +231,10 @@ impl<T: SabertoothSerial> PacketSerial<T> {
         self.parse_response(resp, cmd_value, source)
     }
 
-    fn get_percent(&mut self, cmd_value: CommandGet, source: [u8; 2]) -> Result<f32> {
+    fn get_ratio(&mut self, cmd_value: CommandGet, source: [u8; 2]) -> Result<f32> {
         let value = self.get(cmd_value, source)?;
-        let percent = utils::value_to_percent(value);
-        Ok(percent)
+        let ratio = utils::value_to_ratio(value);
+        Ok(ratio)
     }
 }
 
@@ -272,42 +272,42 @@ impl<T: SabertoothSerial> Sabertooth2x32 for PacketSerial<T> {
         self.set(CommandSet::Shutdown, 1, target)
     }
 
-    fn set_speed(&mut self, channel: usize, percent: f32) -> Result<()> {
-        self.set_percent(percent, [b'M', match_channel_to!(channel, b'1', b'2')])
+    fn set_speed(&mut self, channel: usize, ratio: f32) -> Result<()> {
+        self.set_ratio(ratio, [b'M', match_channel_to!(channel, b'1', b'2')])
     }
 
     fn get_speed(&mut self, channel: usize) -> Result<f32> {
-        self.get_percent(
+        self.get_ratio(
             CommandGet::Value,
             [b'M', match_channel_to!(channel, b'1', b'2')],
         )
     }
 
-    fn set_drive(&mut self, percent: f32) -> Result<()> {
-        self.set_percent(percent, [b'M', b'D'])
+    fn set_drive(&mut self, ratio: f32) -> Result<()> {
+        self.set_ratio(ratio, [b'M', b'D'])
     }
 
-    fn set_turn(&mut self, percent: f32) -> Result<()> {
-        self.set_percent(percent, [b'M', b'T'])
+    fn set_turn(&mut self, ratio: f32) -> Result<()> {
+        self.set_ratio(ratio, [b'M', b'T'])
     }
 
-    fn set_power(&mut self, channel: usize, percent: f32) -> Result<()> {
-        self.set_percent(percent, [b'P', match_channel_to!(channel, b'1', b'2')])
+    fn set_power(&mut self, channel: usize, ratio: f32) -> Result<()> {
+        self.set_ratio(ratio, [b'P', match_channel_to!(channel, b'1', b'2')])
     }
 
     fn get_power(&mut self, channel: usize) -> Result<f32> {
-        self.get_percent(
+        self.get_ratio(
             CommandGet::Value,
             [b'P', match_channel_to!(channel, b'1', b'2')],
         )
     }
 
-    fn set_ramp(&mut self, channel: usize, percent: f32) -> Result<()> {
-        self.set_percent(percent, [b'R', match_channel_to!(channel, b'1', b'2')])
+    fn set_ramp(&mut self, channel: usize, ratio: f32) -> Result<()> {
+        self.set_ratio(ratio, [b'R', match_channel_to!(channel, b'1', b'2')])
     }
 
-    fn set_aux(&mut self, channel: usize, percent: f32) -> Result<()> {
-        self.set_percent(percent, [b'Q', match_channel_to!(channel, b'1', b'2')])
+    fn set_aux(&mut self, channel: usize, ratio: f32) -> Result<()> {
+        self.set_ratio(ratio, [b'Q', match_channel_to!(channel, b'1', b'2')])
     }
 
     fn get_voltage(&mut self, channel: usize) -> Result<f32> {

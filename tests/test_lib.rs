@@ -11,8 +11,8 @@ fn instantiate_multiple_protocols() {
     let mut sabertext = PlainText::from(&dev);
     let mut saberchecksum = PacketSerial::from(&dev);
     dev.write_all(b"gibberish").expect("Raw interface failed");
-    sabertext.set_speed(1, 20.0).expect("Text interface failed");
+    sabertext.set_speed(1, 0.2).expect("Text interface failed");
     saberchecksum
-        .set_speed(1, 20.0)
+        .set_speed(1, 0.2)
         .expect("Checksum interface failed");
 }
