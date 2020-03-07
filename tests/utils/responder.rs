@@ -148,7 +148,7 @@ impl ResponderController {
                 if let Some(e) = e.downcast_ref::<String>() {
                     Err(e.to_string())
                 } else if let Some(e) = e.downcast_ref::<&'static str>() {
-                    Err(e.to_string())
+                    Err((*e).to_string())
                 } else {
                     Err(format!("Unknown error: {:?}", e))
                 }

@@ -18,7 +18,7 @@ In `Cargo.toml`:
 
 ```toml
 [dependencies]
-saberrs = "0.2"
+saberrs = "0.3"
 ```
 
 In application code:
@@ -30,7 +30,7 @@ use saberrs::sabertooth2x32::{Sabertooth2x32, PacketSerial};
 let mut saber = PacketSerial::new("/dev/ttyS0")?;
 
 // Go forward at half-speed (50.0%)
-saber.set_drive(50.0)?;
+saber.set_drive(0.5)?;
 saber.set_turn(0.0)?;
 
 // Request the battery voltage from motor 1.
@@ -46,7 +46,7 @@ Other protocol variants can be used:
 ```rust
 use saberrs::sabertooth2x32::{Sabertooth2x32, PacketSerial, PacketType, PlainText};
 
-// "PacketSerial" with specified address and frame protection type.
+// "PacketSerial" with specified address and frame protection type (checksum or crc).
 let mut saber = PacketSerial::new("/dev/ttyS0")?
     .with_packet_type(PacketType::Checksum)
     .with_address(129);

@@ -144,7 +144,7 @@ mod checksum {
         #[rustfmt::skip]
             let vectors = [
             (1, b"\x80\x29\x00\x29\x4D\x31\x7E".to_vec(), b"\x80\x49\x00\x49\x7F\x03\x4D\x31\x00".to_vec(), 0.24963),
-            (2, b"\x80\x29\x00\x29\x4D\x32\x7F".to_vec(), b"\x80\x49\x01\x4A\x2E\x08\x4D\x32\x35".to_vec(), -0.522716),
+            (2, b"\x80\x29\x00\x29\x4D\x32\x7F".to_vec(), b"\x80\x49\x01\x4A\x2E\x08\x4D\x32\x35".to_vec(), -0.522_716),
         ];
 
         let (mut saberchecksum, responder) = utils::saberchecksum_responder_harness();
@@ -327,8 +327,8 @@ mod crc {
     fn get_speed() {
         #[rustfmt::skip]
             let vectors = [
-            (1, b"\xF0\x29\x00\x6D\x4D\x31\x06\x24".to_vec(), b"\xF0\x49\x00\x15\x00\x0C\x4D\x31\x43\x38".to_vec(), 0.7503664),
-            (2, b"\xF0\x29\x00\x6D\x4D\x32\x74\x34".to_vec(), b"\xF0\x49\x01\x39\x6B\x05\x4D\x32\x4C\x58".to_vec(), -0.36492428),
+            (1, b"\xF0\x29\x00\x6D\x4D\x31\x06\x24".to_vec(), b"\xF0\x49\x00\x15\x00\x0C\x4D\x31\x43\x38".to_vec(), 0.750_366_4),
+            (2, b"\xF0\x29\x00\x6D\x4D\x32\x74\x34".to_vec(), b"\xF0\x49\x01\x39\x6B\x05\x4D\x32\x4C\x58".to_vec(), -0.364_924_28),
         ];
 
         let (mut sabercrc, responder) = utils::sabercrc_responder_harness();

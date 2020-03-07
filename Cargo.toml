@@ -1,7 +1,7 @@
 [package]
 name = "saberrs"
 description = "A library for interfacing with Dimension Engineering's Sabertooth motor drivers."
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Franck Parat <franck.parat@gmail.com>"]
 edition = "2018"
 readme = "README.md"
@@ -22,4 +22,3 @@ optional = true
 
 [features]
 default = ["serialport"]
-
