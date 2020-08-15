@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.3.1 (2020-08-15)
+- Fix documentation
+
 ## v0.3.0 (2020-08-15)
 - **Breaking change**: changed the parameters format of functions taking a
   percentage between -100.0 and +100.0. Now those parameters take a ratio

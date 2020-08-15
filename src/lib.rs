@@ -14,7 +14,7 @@
 //! let mut saber = PacketSerial::new("/dev/ttyS0")?;
 //!
 //! // Go forward at half-speed (50.0%)
-//! saber.set_drive(50.0)?;
+//! saber.set_drive(0.5)?;
 //! saber.set_turn(0.0)?;
 //!
 //! // Request the battery voltage from motor 1.
