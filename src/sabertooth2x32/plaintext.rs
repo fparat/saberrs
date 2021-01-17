@@ -5,7 +5,7 @@ use std::str;
 use log::debug;
 
 use super::Sabertooth2x32;
-use crate::error::{Error, ErrorKind, Result};
+use crate::error::{Error, Result};
 use crate::port::SabertoothSerial;
 use crate::utils;
 
@@ -106,10 +106,10 @@ impl<T: SabertoothSerial> PlainText<T> {
             let expected = format!("{}{}: {}<value>", token, splitted.1, prefix.unwrap_or(' '));
             let received = String::from_utf8(resp.to_vec()).unwrap_or(format!("{:?}", resp));
             let descr = format!(
-                "Invalid response: expected the form {:?} but received {:?}",
+                "expected the form {:?} but received {:?}",
                 &expected, received
             );
-            return Err(Error::new(ErrorKind::Response, &descr));
+            return Err(Error::Response(descr));
         }
         Ok(splitted.3)
     }
@@ -213,17 +213,12 @@ fn split_response(rxdata: &[u8]) -> Result<SplitResponse> {
     // Get the a &str. ASCII is expected
     let resp = match str::from_utf8(rxdata) {
         Ok(r) => r,
-        Err(_) => {
-            return Err(Error::new(
-                ErrorKind::Response,
-                "Invalid response, not readable",
-            ))
-        }
+        Err(_) => return Err(Error::Response("not readable".to_string())),
     };
 
     // Prepare the error to return in case of failure. It is a closure so that
     // we can provide it to several ok_or_else().
-    let error = || Error::new(ErrorKind::Response, "Parse failure");
+    let error = || Error::Response("parse failure".to_string());
 
     // Trim and create the iterator over the characters.
     let mut resp_iter = resp.trim_matches(char::from(0)).trim().chars();

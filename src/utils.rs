@@ -1,4 +1,4 @@
-use crate::error::{Error, ErrorKind, Result};
+use crate::error::{Error, Result};
 
 pub const RANGE_MAX: i32 = 2047;
 pub const RANGE_MIN: i32 = -2047;
@@ -9,8 +9,8 @@ macro_rules! match_channel_to {
             1 => $ch1,
             2 => $ch2,
             _ => {
-                let msg = format!("Channel should be 1 or 2 (was {})", $channel);
-                return Err(Error::new(ErrorKind::InvalidInput, msg));
+                let msg = format!("channel should be 1 or 2 (was {})", $channel);
+                return Err(crate::error::Error::InvalidInput(msg));
             }
         }
     };
@@ -18,10 +18,10 @@ macro_rules! match_channel_to {
 
 pub fn ratio_to_value(ratio: f32) -> Result<i32> {
     if ratio > 1.0 || ratio < -1.0 {
-        return Err(Error::new(
-            ErrorKind::InvalidInput,
-            format!("Value ({}) out of range -1.0~1.0", ratio),
-        ));
+        return Err(Error::InvalidInput(format!(
+            "value ({}) out of range -1.0~1.0",
+            ratio
+        )));
     }
 
     let value = (ratio * RANGE_MAX as f32) as i32;

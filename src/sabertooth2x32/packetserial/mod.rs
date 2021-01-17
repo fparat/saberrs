@@ -1,7 +1,7 @@
 #[allow(unused_imports)]
 use log::debug;
 
-use crate::error::{Error, ErrorKind, Result};
+use crate::error::{Error, Result};
 use crate::port::SabertoothSerial;
 use crate::sabertooth2x32::Sabertooth2x32;
 use crate::utils;
@@ -179,7 +179,7 @@ impl<T: SabertoothSerial> PacketSerial<T> {
         expected_cmdvalue: CommandGet,
         expected_source: [u8; 2],
     ) -> Result<i32> {
-        let error = |s: &str| Err(Error::new(ErrorKind::Response, s));
+        let error = |s: &str| Err(Error::Response(s.to_string()));
 
         let resp_cmdnum = resp[1];
         let resp_cmdvalue = resp[2];
@@ -193,20 +193,20 @@ impl<T: SabertoothSerial> PacketSerial<T> {
 
         match validity {
             Ok(_) => {}
-            Err(ParseError::PacketSize) => return error("Invalid packet size"),
-            Err(ParseError::ChecksumError) => return error("Invalid checksum or CRC"),
-            Err(ParseError::AddressError) => return error("Invalid address"),
+            Err(ParseError::PacketSize) => return error("invalid packet size"),
+            Err(ParseError::ChecksumError) => return error("invalid checksum or CRC"),
+            Err(ParseError::AddressError) => return error("invalid address"),
         }
 
         if resp_cmdnum != CMD_NUM_REPLY {
-            return error("Invalid command num");
+            return error("invalid command num");
         }
 
         let expected_cmdvalue = expected_cmdvalue as u8;
         let is_negative = match resp_cmdvalue {
             _ if resp_cmdvalue == (expected_cmdvalue + 1) => true,
             _ if resp_cmdvalue == expected_cmdvalue => false,
-            _ => return error("Invalid command value"),
+            _ => return error("invalid command value"),
         };
 
         let mut data_value = i32::from(unpack_data_value(resp_data_value));
@@ -215,7 +215,7 @@ impl<T: SabertoothSerial> PacketSerial<T> {
         }
 
         if resp_data_source != &expected_source[..] {
-            return error("Invalid source");
+            return error("invalid source");
         }
 
         Ok(data_value)

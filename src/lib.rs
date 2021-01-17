@@ -151,7 +151,7 @@
 //! [serialport]: https://crates.io/crates/serialport
 //! [log]: https://crates.io/crates/log
 
-pub use error::{Error, ErrorKind, Result};
+pub use error::{Error, Result};
 pub use port::SabertoothSerial;
 
 #[cfg(feature = "serialport")]
