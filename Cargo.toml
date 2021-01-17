@@ -16,7 +16,7 @@ categories = ["embedded", "hardware-support", "science::robotics"]
 log = "0.4"
 
 [dependencies.serialport]
-version = "3.3.0"
+version = "4.0"
 default-features = false
 optional = true
 

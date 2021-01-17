@@ -1,5 +1,9 @@
 # Changelog
 
+## Next release
+### Changed
+- Update dependency `seriaport` to v4.0
+
 ## v0.3.1 (2020-08-15)
 - Fix documentation
 

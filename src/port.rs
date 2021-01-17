@@ -59,9 +59,7 @@ pub mod sabertoothport {
     use std::rc::Rc;
     use std::time::Duration;
 
-    use serialport;
-    use serialport::{ClearBuffer, DataBits, FlowControl, Parity, StopBits};
-    use serialport::{SerialPort, SerialPortSettings};
+    use serialport::{self, ClearBuffer, DataBits, FlowControl, Parity, SerialPort, StopBits};
 
     use crate::{Result, SabertoothSerial};
 
@@ -69,17 +67,30 @@ pub mod sabertoothport {
     const DEFAULT_BAUDRATE: u32 = 9600;
 
     /// Default timeout setting when opening a `SabertoothPort`.
-    const DEFAULT_TIMEOUT_MS: u64 = 100;
+    const DEFAULT_TIMEOUT: Duration = Duration::from_millis(100);
 
-    /// Default serial settings.
-    const DEFAULT_SETTINGS: SerialPortSettings = SerialPortSettings {
-        baud_rate: DEFAULT_BAUDRATE,
-        data_bits: DataBits::Eight,
-        flow_control: FlowControl::None,
-        parity: Parity::None,
-        stop_bits: StopBits::One,
-        timeout: Duration::from_millis(DEFAULT_TIMEOUT_MS),
-    };
+    /// Default data bits setting when opening a `SabertoothPort`
+    const DEFAULT_DATA_BITS: DataBits = DataBits::Eight;
+
+    /// Default flow control setting when opening a `SabertoothPort`
+    const DEFAULT_FLOW_CONTROL: FlowControl = FlowControl::None;
+
+    /// Default parity setting when opening a `SabertoothPort`
+    const DEFAULT_PARITY: Parity = Parity::None;
+
+    /// Default stop bits setting when opening a `SabertoothPort`
+    const DEFAULT_STOP_BITS: StopBits = StopBits::One;
+
+    fn open_default_serialport(port: &str) -> Result<Box<dyn SerialPort>> {
+        let ser = serialport::new(port, DEFAULT_BAUDRATE)
+            .timeout(DEFAULT_TIMEOUT)
+            .data_bits(DEFAULT_DATA_BITS)
+            .flow_control(DEFAULT_FLOW_CONTROL)
+            .parity(DEFAULT_PARITY)
+            .stop_bits(DEFAULT_STOP_BITS)
+            .open()?;
+        Ok(ser)
+    }
 
     /// Raw Sabertooth controller.
     ///
@@ -94,7 +105,7 @@ pub mod sabertoothport {
     impl SabertoothPort {
         /// Create a new `SabertoothPort` with a default configuration
         pub fn new(port: &str) -> Result<SabertoothPort> {
-            let ser = serialport::open_with_settings(port, &DEFAULT_SETTINGS)?;
+            let ser = open_default_serialport(port)?;
             Ok(SabertoothPort { dev: ser })
         }
     }
@@ -187,7 +198,7 @@ pub mod sabertoothport {
     impl SabertoothPortShared {
         /// Create a new `SabertoothPortShared` with a default configuration
         pub fn new(port: &str) -> Result<SabertoothPortShared> {
-            let ser = serialport::open_with_settings(port, &DEFAULT_SETTINGS)?;
+            let ser = open_default_serialport(port)?;
             Ok(SabertoothPortShared {
                 dev: Rc::new(RefCell::new(ser)),
             })

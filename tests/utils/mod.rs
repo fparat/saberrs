@@ -2,8 +2,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use serialport::posix::TTYPort;
 use serialport::SerialPort;
+use serialport::TTYPort;
 
 use saberrs::sabertooth2x32::{PacketSerial, PacketType, PlainText};
 use saberrs::{SabertoothPort, SabertoothPortShared, SabertoothSerial};
