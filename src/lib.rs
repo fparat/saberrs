@@ -145,6 +145,7 @@
 //!
 //! [Dimension Engineering]: https://www.dimensionengineering.com
 //! [Sabertooth 2x32]: https://www.dimensionengineering.com/products/sabertooth2x32
+//! [Sabertooth 2x60]: https://www.dimensionengineering.com/products/sabertooth2x60
 //! [SabertoothSerial]: trait.SabertoothSerial.html
 //! [SabertoothPort]: struct.SabertoothPort.html
 //! [SabertoothPortShared]: struct.SabertoothPortShared.html
@@ -167,3 +168,8 @@ mod port;
 ///
 /// [Sabertooth 2x32]: https://www.dimensionengineering.com/products/sabertooth2x32
 pub mod sabertooth2x32;
+
+/// Interface for the [Sabertooth 2x60].
+///
+/// [Sabertooth 2x60]: https://www.dimensionengineering.com/products/sabertooth2x60
+pub mod sabertooth2x60;
