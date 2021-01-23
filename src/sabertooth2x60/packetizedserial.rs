@@ -7,7 +7,6 @@ use super::Sabertooth2x60;
 
 pub const ADDRESS_MIN: u8 = 128;
 pub const ADDRESS_MAX: u8 = 135;
-pub const ADDRESS_DEFAULT: u8 = 128;
 
 const COMMAND_DRIVE_FORWARD_MOTOR_1: u8 = 0;
 const COMMAND_DRIVE_BACKWARDS_MOTOR_1: u8 = 1;
