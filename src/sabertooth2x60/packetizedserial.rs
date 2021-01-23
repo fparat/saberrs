@@ -179,6 +179,14 @@ impl<T: SabertoothSerial> Sabertooth2x60 for PacketizedSerial<T> {
     }
 
     fn set_deadband(&mut self, ratio: f32) -> Result<()> {
-        todo!()
+        // check negativity, ratio_to_0_127() accept -1.0~1.0
+        if ratio < 0.0 {
+            let msg = "the deadband ratio must be positive".to_string();
+            return Err(Error::InvalidInput(msg));
+        }
+        let data = ratio_to_0_127(ratio)?;
+        let packet = self.make_packet(COMMAND_DEADBAND, data);
+        self.write_frame(&packet)?;
+        Ok(())
     }
 }

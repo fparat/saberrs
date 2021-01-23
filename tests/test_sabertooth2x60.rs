@@ -173,3 +173,28 @@ fn test_set_baudrate() {
     ];
     test_set_method_no_channel!(saber, set_baudrate, vectors, tty);
 }
+
+#[test]
+fn test_set_ramp() {
+    println!("todo");
+}
+
+#[test]
+fn test_set_deadband() {
+    let (mut saber, mut tty) = saber2x60_harness(135).unwrap();
+    let vectors = [
+        (0.0, vec![135, 17, 0, 24]),
+        (0.2, vec![135, 17, 25, 49]),
+        (0.5, vec![135, 17, 63, 87]),
+        (0.85, vec![135, 17, 107, 3]),
+        (1.0, vec![135, 17, 127, 23]),
+    ];
+    test_set_method_no_channel!(saber, set_deadband, vectors, tty);
+
+    saber
+        .set_deadband(-0.1)
+        .expect_err("expected out of range error");
+    saber
+        .set_deadband(1.1)
+        .expect_err("expected out of range error");
+}
