@@ -6,6 +6,16 @@ pub mod packetizedserial;
 
 pub use packetizedserial::PacketizedSerial;
 
+/// Possible serial baudrates for command 15
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+pub enum Baudrate {
+    B2400,
+    B9600,
+    B19200,
+    B38400,
+    B115200,
+}
+
 /// Trait exposing the available methods for controlling the Sabertooth 2x60.
 pub trait Sabertooth2x60 {
     /// Set the drive value for a motor. *motor* is 1 or 2, and *ratio* is a
@@ -43,7 +53,7 @@ pub trait Sabertooth2x60 {
 
     /// Set the serial baudrate. Valid values are: 2400, 9600 (default), 19200,
     /// 38400 and 115200. This setting *does* persist between power cycles.
-    fn set_baudrate(&mut self, baudrate: u32) -> Result<()>;
+    fn set_baudrate(&mut self, baudrate: Baudrate) -> Result<()>;
 
     /// Set the speed ramping value. This function estimates the command value
     /// that corresponds to the given ramp time according to the manual.

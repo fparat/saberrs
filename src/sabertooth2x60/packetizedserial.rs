@@ -5,7 +5,7 @@ use crate::{Error, Result, SabertoothSerial};
 #[cfg(feature = "serialport")]
 use crate::SabertoothPort;
 
-use super::Sabertooth2x60;
+use super::{Baudrate, Sabertooth2x60};
 
 pub const ADDRESS_MIN: u8 = 128;
 pub const ADDRESS_MAX: u8 = 135;
@@ -161,8 +161,17 @@ impl<T: SabertoothSerial> Sabertooth2x60 for PacketizedSerial<T> {
         Ok(())
     }
 
-    fn set_baudrate(&mut self, baudrate: u32) -> Result<()> {
-        todo!()
+    fn set_baudrate(&mut self, baudrate: Baudrate) -> Result<()> {
+        let data = match baudrate {
+            Baudrate::B2400 => 1,
+            Baudrate::B9600 => 2,
+            Baudrate::B19200 => 3,
+            Baudrate::B38400 => 4,
+            Baudrate::B115200 => 5,
+        };
+        let packet = self.make_packet(COMMAND_BAUDRATE, data);
+        self.write_frame(&packet)?;
+        Ok(())
     }
 
     fn set_ramp(&mut self, ramp: std::time::Duration) -> Result<()> {

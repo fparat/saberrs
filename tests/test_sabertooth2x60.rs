@@ -159,3 +159,17 @@ fn test_set_serial_timeout() {
         .set_serial_timeout(Duration::from_millis(12701))
         .expect_err("expected out of range error");
 }
+
+#[test]
+fn test_set_baudrate() {
+    use saberrs::sabertooth2x60::Baudrate;
+    let (mut saber, mut tty) = saber2x60_harness(133).unwrap();
+    let vectors = [
+        (Baudrate::B2400, vec![133, 15, 1, 21]),
+        (Baudrate::B9600, vec![133, 15, 2, 22]),
+        (Baudrate::B19200, vec![133, 15, 3, 23]),
+        (Baudrate::B38400, vec![133, 15, 4, 24]),
+        (Baudrate::B115200, vec![133, 15, 5, 25]),
+    ];
+    test_set_method_no_channel!(saber, set_baudrate, vectors, tty);
+}
