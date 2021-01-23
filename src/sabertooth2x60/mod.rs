@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use crate::Result;
 
-mod packetizedserial;
+pub mod packetizedserial;
 
 pub use packetizedserial::PacketizedSerial;
 

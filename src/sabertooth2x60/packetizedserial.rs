@@ -8,10 +8,24 @@ use super::Sabertooth2x60;
 pub const ADDRESS_MIN: u8 = 128;
 pub const ADDRESS_MAX: u8 = 135;
 
-const COMMAND_DRIVE_FORWARD_MOTOR_1: u8 = 0;
-const COMMAND_DRIVE_BACKWARDS_MOTOR_1: u8 = 1;
-const COMMAND_DRIVE_FORWARD_MOTOR_2: u8 = 4;
-const COMMAND_DRIVE_BACKWARDS_MOTOR_2: u8 = 5;
+pub const COMMAND_DRIVE_FORWARD_MOTOR_1: u8 = 0;
+pub const COMMAND_DRIVE_BACKWARDS_MOTOR_1: u8 = 1;
+pub const COMMAND_MIN_VOLTAGE: u8 = 2;
+pub const COMMAND_MAX_VOLTAGE: u8 = 3;
+pub const COMMAND_DRIVE_FORWARD_MOTOR_2: u8 = 4;
+pub const COMMAND_DRIVE_BACKWARDS_MOTOR_2: u8 = 5;
+pub const COMMAND_DRIVE_MOTOR_1: u8 = 6;
+pub const COMMAND_DRIVE_MOTOR_2 : u8 = 7;
+pub const COMMAND_DRIVE_FORWARD_MIXED: u8 = 8;
+pub const COMMAND_DRIVE_BACKWARDS_MIXED: u8 = 9;
+pub const COMMAND_TURN_RIGHT_MIXED: u8 = 10;
+pub const COMMAND_TURN_LEFT_MIXED: u8 = 11;
+pub const COMMAND_DRIVE_FORWARDS_BACK: u8 = 12;
+pub const COMMAND_TURN_7_BIT: u8 = 13;
+pub const COMMAND_SERIAL_TIMEOUT: u8 = 14;
+pub const COMMAND_BAUDRATE: u8 = 15;
+pub const COMMAND_RAMPING: u8 = 16;
+pub const COMMAND_DEADBAND: u8 = 17;
 
 fn address_is_valid(address: u8) -> bool {
     address >= ADDRESS_MIN && address <= ADDRESS_MAX
