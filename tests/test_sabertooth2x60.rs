@@ -50,3 +50,27 @@ fn test_set_drive_motor() {
     ];
     test_set_method!(saber, set_drive_motor, vectors, tty);
 }
+
+#[test]
+fn test_set_min_voltage() {
+    let (mut saber, mut tty) = saber2x60_harness(129).unwrap();
+    let vectors = [
+        (6., vec![129, 2, 0, 3]),
+        (10., vec![129, 2, 20, 23]),
+        (25., vec![129, 2, 95, 98]),
+        (30., vec![129, 2, 120, 123]),
+    ];
+    test_set_method_no_channel!(saber, set_min_voltage, vectors, tty);
+}
+
+#[test]
+fn test_set_max_voltage() {
+    let (mut saber, mut tty) = saber2x60_harness(130).unwrap();
+    let vectors = [
+        (0., vec![130, 3, 0, 5]),
+        (10., vec![130, 3, 51, 56]),
+        (17., vec![130, 3, 87, 92]),
+        (25., vec![130, 3, 128, 5]),
+    ];
+    test_set_method_no_channel!(saber, set_max_voltage, vectors, tty);
+}

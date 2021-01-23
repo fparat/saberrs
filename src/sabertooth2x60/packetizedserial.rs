@@ -1,3 +1,5 @@
+#![allow(clippy::manual_range_contains)]
+
 use crate::{Error, Result, SabertoothSerial};
 
 #[cfg(feature = "serialport")]
@@ -15,7 +17,7 @@ pub const COMMAND_MAX_VOLTAGE: u8 = 3;
 pub const COMMAND_DRIVE_FORWARD_MOTOR_2: u8 = 4;
 pub const COMMAND_DRIVE_BACKWARDS_MOTOR_2: u8 = 5;
 pub const COMMAND_DRIVE_MOTOR_1: u8 = 6;
-pub const COMMAND_DRIVE_MOTOR_2 : u8 = 7;
+pub const COMMAND_DRIVE_MOTOR_2: u8 = 7;
 pub const COMMAND_DRIVE_FORWARD_MIXED: u8 = 8;
 pub const COMMAND_DRIVE_BACKWARDS_MIXED: u8 = 9;
 pub const COMMAND_TURN_RIGHT_MIXED: u8 = 10;
@@ -104,11 +106,25 @@ impl<T: SabertoothSerial> Sabertooth2x60 for PacketizedSerial<T> {
     }
 
     fn set_min_voltage(&mut self, volts: f32) -> Result<()> {
-        todo!()
+        let data = ((volts - 6.) * 5.) as i32;
+        if data < 0 || data > 120 {
+            let msg = format!("min voltage {} out of range, must within 6-30 volts", volts);
+            return Err(Error::InvalidInput(msg));
+        }
+        let packet = self.make_packet(COMMAND_MIN_VOLTAGE, data as u8);
+        self.write_frame(&packet)?;
+        Ok(())
     }
 
     fn set_max_voltage(&mut self, volts: f32) -> Result<()> {
-        todo!()
+        if volts < 0. || volts > 25. {
+            let msg = format!("max voltage {} out of range, must within 0-25 volts", volts);
+            return Err(Error::InvalidInput(msg));
+        }
+        let data = (volts * 5.12f32) as u8;
+        let packet = self.make_packet(COMMAND_MAX_VOLTAGE, data as u8);
+        self.write_frame(&packet)?;
+        Ok(())
     }
 
     fn set_drive_mixed(&mut self, ratio: f32) -> Result<()> {
