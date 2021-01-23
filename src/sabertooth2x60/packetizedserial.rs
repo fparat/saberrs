@@ -128,15 +128,37 @@ impl<T: SabertoothSerial> Sabertooth2x60 for PacketizedSerial<T> {
     }
 
     fn set_drive_mixed(&mut self, ratio: f32) -> Result<()> {
-        todo!()
+        let (command, data) = match ratio {
+            ratio if ratio >= 0. => (COMMAND_DRIVE_FORWARD_MIXED, ratio_to_0_127(ratio)?),
+            ratio if ratio < 0. => (COMMAND_DRIVE_BACKWARDS_MIXED, ratio_to_0_127(-ratio)?),
+            _ => return Err(Error::InvalidInput(format!("Invalid ratio {}", ratio))),
+        };
+        let packet = self.make_packet(command, data);
+        self.write_frame(&packet)?;
+        Ok(())
     }
 
     fn set_turn_mixed(&mut self, ratio: f32) -> Result<()> {
-        todo!()
+        let (command, data) = match ratio {
+            ratio if ratio >= 0. => (COMMAND_TURN_RIGHT_MIXED, ratio_to_0_127(ratio)?),
+            ratio if ratio < 0. => (COMMAND_TURN_LEFT_MIXED, ratio_to_0_127(-ratio)?),
+            _ => return Err(Error::InvalidInput(format!("Invalid ratio {}", ratio))),
+        };
+        let packet = self.make_packet(command, data);
+        self.write_frame(&packet)?;
+        Ok(())
     }
 
     fn set_serial_timeout(&mut self, timeout: std::time::Duration) -> Result<()> {
-        todo!()
+        let command = COMMAND_SERIAL_TIMEOUT;
+        let data = ((timeout.as_millis() + 99) / 100) as u8;
+        if data > 127 {
+            let msg = format!("Timeout {}ms out of range", timeout.as_millis());
+            return Err(Error::InvalidInput(msg));
+        }
+        let packet = self.make_packet(command, data);
+        self.write_frame(&packet)?;
+        Ok(())
     }
 
     fn set_baudrate(&mut self, baudrate: u32) -> Result<()> {

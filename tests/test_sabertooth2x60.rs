@@ -1,4 +1,5 @@
 use std::io::Read;
+use std::time::Duration;
 
 use saberrs::sabertooth2x60::{PacketizedSerial, Sabertooth2x60};
 use saberrs::{Result, SabertoothPort};
@@ -50,10 +51,18 @@ fn test_set_drive_motor() {
     ];
     test_set_method!(saber, set_drive_motor, vectors, tty);
 
-    saber.set_drive_motor(0, 0.5).expect_err("expected invalid motor error");
-    saber.set_drive_motor(3, 0.5).expect_err("expected invalid motor error");
-    saber.set_drive_motor(1, -1.1).expect_err("expected out of range error");
-    saber.set_drive_motor(1, 1.1).expect_err("expected out of range error");
+    saber
+        .set_drive_motor(0, 0.5)
+        .expect_err("expected invalid motor error");
+    saber
+        .set_drive_motor(3, 0.5)
+        .expect_err("expected invalid motor error");
+    saber
+        .set_drive_motor(1, -1.1)
+        .expect_err("expected out of range error");
+    saber
+        .set_drive_motor(1, 1.1)
+        .expect_err("expected out of range error");
 }
 
 #[test]
@@ -67,8 +76,12 @@ fn test_set_min_voltage() {
     ];
     test_set_method_no_channel!(saber, set_min_voltage, vectors, tty);
 
-    saber.set_min_voltage(-0.1).expect_err("expected out of range error");
-    saber.set_min_voltage(120.1).expect_err("expected out of range error");
+    saber
+        .set_min_voltage(-0.1)
+        .expect_err("expected out of range error");
+    saber
+        .set_min_voltage(120.1)
+        .expect_err("expected out of range error");
 }
 
 #[test]
@@ -82,6 +95,67 @@ fn test_set_max_voltage() {
     ];
     test_set_method_no_channel!(saber, set_max_voltage, vectors, tty);
 
-    saber.set_max_voltage(-0.1).expect_err("expected out of range error");
-    saber.set_max_voltage(25.1).expect_err("expected out of range error");
+    saber
+        .set_max_voltage(-0.1)
+        .expect_err("expected out of range error");
+    saber
+        .set_max_voltage(25.1)
+        .expect_err("expected out of range error");
+}
+
+#[test]
+fn test_set_drive_mixed() {
+    let (mut saber, mut tty) = saber2x60_harness(131).unwrap();
+    let vectors = [
+        (0., vec![131, 8, 0, 11]),
+        (1., vec![131, 8, 127, 10]),
+        (-1., vec![131, 9, 127, 11]),
+        (0.5, vec![131, 8, 63, 74]),
+        (-0.3, vec![131, 9, 38, 50]),
+    ];
+    test_set_method_no_channel!(saber, set_drive_mixed, vectors, tty);
+
+    saber
+        .set_drive_mixed(1.1)
+        .expect_err("expected out of range error");
+    saber
+        .set_drive_mixed(-1.1)
+        .expect_err("expected out of range error");
+}
+
+#[test]
+fn test_set_turn_mixed() {
+    let (mut saber, mut tty) = saber2x60_harness(131).unwrap();
+    let vectors = [
+        (0., vec![131, 10, 0, 13]),
+        (1., vec![131, 10, 127, 12]),
+        (-1., vec![131, 11, 127, 13]),
+        (0.5, vec![131, 10, 63, 76]),
+        (-0.3, vec![131, 11, 38, 52]),
+    ];
+    test_set_method_no_channel!(saber, set_turn_mixed, vectors, tty);
+
+    saber
+        .set_turn_mixed(1.1)
+        .expect_err("expected out of range error");
+    saber
+        .set_turn_mixed(-1.1)
+        .expect_err("expected out of range error");
+}
+
+#[test]
+fn test_set_serial_timeout() {
+    let (mut saber, mut tty) = saber2x60_harness(132).unwrap();
+    let vectors = [
+        (Duration::from_millis(100), vec![132, 14, 1, 19]),
+        (Duration::from_millis(12700), vec![132, 14, 127, 17]),
+        (Duration::from_millis(0), vec![132, 14, 0, 18]),
+        (Duration::from_millis(2000), vec![132, 14, 20, 38]),
+        (Duration::from_millis(1), vec![132, 14, 1, 19]), // check ceil rounding
+    ];
+    test_set_method_no_channel!(saber, set_serial_timeout, vectors, tty);
+
+    saber
+        .set_serial_timeout(Duration::from_millis(12701))
+        .expect_err("expected out of range error");
 }
