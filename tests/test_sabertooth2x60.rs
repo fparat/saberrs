@@ -49,6 +49,11 @@ fn test_set_drive_motor() {
         (2, -0.25, vec![128, 5, 31, 36]),
     ];
     test_set_method!(saber, set_drive_motor, vectors, tty);
+
+    saber.set_drive_motor(0, 0.5).expect_err("expected invalid motor error");
+    saber.set_drive_motor(3, 0.5).expect_err("expected invalid motor error");
+    saber.set_drive_motor(1, -1.1).expect_err("expected out of range error");
+    saber.set_drive_motor(1, 1.1).expect_err("expected out of range error");
 }
 
 #[test]
@@ -61,6 +66,9 @@ fn test_set_min_voltage() {
         (30., vec![129, 2, 120, 123]),
     ];
     test_set_method_no_channel!(saber, set_min_voltage, vectors, tty);
+
+    saber.set_min_voltage(-0.1).expect_err("expected out of range error");
+    saber.set_min_voltage(120.1).expect_err("expected out of range error");
 }
 
 #[test]
@@ -73,4 +81,7 @@ fn test_set_max_voltage() {
         (25., vec![130, 3, 128, 5]),
     ];
     test_set_method_no_channel!(saber, set_max_voltage, vectors, tty);
+
+    saber.set_max_voltage(-0.1).expect_err("expected out of range error");
+    saber.set_max_voltage(25.1).expect_err("expected out of range error");
 }
