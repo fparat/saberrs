@@ -141,7 +141,7 @@ fn get_speed() {
     ];
 
     let (mut sabertext, responder) = utils::sabertext_responder_harness();
-    test_get_method!(sabertext, get_speed, vectors, responder);
+    test_get_method_float_with_channel!(sabertext, get_speed, vectors, responder);
     responder.stop();
 }
 
@@ -154,7 +154,7 @@ fn get_power() {
     ];
 
     let (mut sabertext, responder) = utils::sabertext_responder_harness();
-    test_get_method!(sabertext, get_power, vectors, responder);
+    test_get_method_float_with_channel!(sabertext, get_power, vectors, responder);
     responder.stop();
 }
 
@@ -167,7 +167,7 @@ fn get_voltage() {
     ];
 
     let (mut sabertext, responder) = utils::sabertext_responder_harness();
-    test_get_method!(sabertext, get_voltage, vectors, responder);
+    test_get_method_float_with_channel!(sabertext, get_voltage, vectors, responder);
     responder.stop();
 }
 
@@ -180,7 +180,7 @@ fn get_current() {
     ];
 
     let (mut sabertext, responder) = utils::sabertext_responder_harness();
-    test_get_method!(sabertext, get_current, vectors, responder);
+    test_get_method_float_with_channel!(sabertext, get_current, vectors, responder);
     responder.stop();
 }
 
@@ -193,7 +193,7 @@ fn get_temperature() {
     ];
 
     let (mut sabertext, responder) = utils::sabertext_responder_harness();
-    test_get_method!(sabertext, get_temperature, vectors, responder);
+    test_get_method_float_with_channel!(sabertext, get_temperature, vectors, responder);
     responder.stop();
 }
 

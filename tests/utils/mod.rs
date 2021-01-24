@@ -114,7 +114,19 @@ macro_rules! test_set_method_no_channel {
     };
 }
 
-macro_rules! test_get_method {
+macro_rules! check_responder_error {
+    ($responder: expr, $res: expr) => {
+        if $responder.is_alive() {
+            if let Err(e) = $res {
+                panic!("{}", e);
+            }
+        } else {
+            panic!($responder.join_panic().unwrap_err());
+        }
+    };
+}
+
+macro_rules! test_get_method_float_with_channel {
     ($saber:expr, $getter:ident, $vectors:expr, $responder:expr) => {
         for (channel, expected, response, value) in $vectors.iter() {
             $responder.set_expected(expected.as_ref());
@@ -126,13 +138,7 @@ macro_rules! test_get_method {
                 assert_eq_float!(value, ret);
             }
 
-            if $responder.is_alive() {
-                if let Err(e) = res {
-                    panic!("{}", e);
-                }
-            } else {
-                panic!($responder.join_panic().unwrap_err());
-            }
+            check_responder_error!($responder, res)
         }
     };
 }
@@ -149,13 +155,7 @@ macro_rules! test_get_method_no_channel {
                 assert_eq!(value, &ret);
             }
 
-            if $responder.is_alive() {
-                if let Err(e) = res {
-                    panic!("{}", e);
-                }
-            } else {
-                panic!($responder.join_panic().unwrap_err());
-            }
+            check_responder_error!($responder, res)
         }
     };
 }
@@ -172,13 +172,7 @@ macro_rules! test_get_method_float_no_channel {
                 assert_eq_float!(value, &ret);
             }
 
-            if $responder.is_alive() {
-                if let Err(e) = res {
-                    panic!("{}", e);
-                }
-            } else {
-                panic!($responder.join_panic().unwrap_err());
-            }
+            check_responder_error!($responder, res)
         }
     };
 }

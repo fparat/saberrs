@@ -345,7 +345,7 @@ fn test_get_temperature() {
     //     (1, vec![128, 127, 2, 0, 1, 2], vec![1, 0], 0.0),
     //     (2, vec![128, 127, 2, 0, 2, 3], vec![2, 0], 0.0),
     // ];
-    // test_get_method!(saber, get_temperature, vectors, responder);
+    // test_get_method_float_with_channel!(saber, get_temperature, vectors, responder);
 }
 
 #[allow(non_snake_case)]

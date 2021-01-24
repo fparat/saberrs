@@ -148,7 +148,7 @@ mod checksum {
         ];
 
         let (mut saberchecksum, responder) = utils::saberchecksum_responder_harness();
-        test_get_method!(saberchecksum, get_speed, vectors, responder);
+        test_get_method_float_with_channel!(saberchecksum, get_speed, vectors, responder);
         responder.stop();
     }
 
@@ -162,7 +162,7 @@ mod checksum {
         ];
 
         let (mut saberchecksum, responder) = utils::saberchecksum_responder_harness();
-        test_get_method!(saberchecksum, get_voltage, vectors, responder);
+        test_get_method_float_with_channel!(saberchecksum, get_voltage, vectors, responder);
         responder.stop();
     }
 
@@ -176,7 +176,7 @@ mod checksum {
         ];
 
         let (mut saberchecksum, responder) = utils::saberchecksum_responder_harness();
-        test_get_method!(saberchecksum, get_current, vectors, responder);
+        test_get_method_float_with_channel!(saberchecksum, get_current, vectors, responder);
         responder.stop();
     }
 
@@ -190,7 +190,7 @@ mod checksum {
         ];
 
         let (mut saberchecksum, responder) = utils::saberchecksum_responder_harness();
-        test_get_method!(saberchecksum, get_temperature, vectors, responder);
+        test_get_method_float_with_channel!(saberchecksum, get_temperature, vectors, responder);
         responder.stop();
     }
 }
@@ -332,7 +332,7 @@ mod crc {
         ];
 
         let (mut sabercrc, responder) = utils::sabercrc_responder_harness();
-        test_get_method!(sabercrc, get_speed, vectors, responder);
+        test_get_method_float_with_channel!(sabercrc, get_speed, vectors, responder);
         responder.stop();
     }
 
@@ -346,7 +346,7 @@ mod crc {
         ];
 
         let (mut sabercrc, responder) = utils::sabercrc_responder_harness();
-        test_get_method!(sabercrc, get_voltage, vectors, responder);
+        test_get_method_float_with_channel!(sabercrc, get_voltage, vectors, responder);
         responder.stop();
     }
 
@@ -360,7 +360,7 @@ mod crc {
         ];
 
         let (mut sabercrc, responder) = utils::sabercrc_responder_harness();
-        test_get_method!(sabercrc, get_current, vectors, responder);
+        test_get_method_float_with_channel!(sabercrc, get_current, vectors, responder);
         responder.stop();
     }
 
@@ -374,7 +374,7 @@ mod crc {
         ];
 
         let (mut sabercrc, responder) = utils::sabercrc_responder_harness();
-        test_get_method!(sabercrc, get_temperature, vectors, responder);
+        test_get_method_float_with_channel!(sabercrc, get_temperature, vectors, responder);
         responder.stop();
     }
 }
