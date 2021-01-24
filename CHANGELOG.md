@@ -3,7 +3,10 @@
 ## Next release
 ### Changed
 - Update dependency `seriaport` to v4.0
-- **Breaking change**: Simpler Error type
+- **Breaking change**: simpler Error type
+
+### Added
+- Sabertooth 2x60 support
 
 ## v0.3.1 (2020-08-15)
 - Fix documentation

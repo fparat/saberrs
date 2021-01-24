@@ -57,6 +57,7 @@ fn err_motor<T>(motor: usize) -> Result<T> {
     Err(Error::InvalidInput(msg))
 }
 
+/// Interface for Sabertooth 2x60 using the "Packetized Serial" protocol.
 #[derive(Debug)]
 pub struct PacketizedSerial<T: SabertoothSerial> {
     dev: T,
@@ -79,6 +80,8 @@ impl PacketizedSerial<SabertoothPort> {
 }
 
 impl<T: SabertoothSerial> PacketizedSerial<T> {
+    /// Create a new `PacketizedSerial` from a serial device handle. This handle
+    /// must implement `SabertoothSerial`.
     pub fn from_serial(dev: T, address: u8) -> Result<Self> {
         if address_is_valid(address) {
             let saber = PacketizedSerial { dev, address };

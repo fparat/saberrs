@@ -1,7 +1,9 @@
 //! `saberrs` is a library for interfacing with [Dimension Engineering]
 //! Sabertooth motor driver.
 //!
-//! Currently only the Sabertooth 2x32 is supported.
+//! Support:
+//! - Sabertooth 2x32
+//! - Sabertooth 2x60
 //!
 //! # Simple usage
 //!

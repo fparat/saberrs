@@ -8,7 +8,9 @@
 `saberrs` is a library for interfacing with [Dimension Engineering]
 Sabertooth motor driver.
 
-Currently only the Sabertooth 2x32 is supported.
+Support:
+- Sabertooth 2x32
+- Sabertooth 2x60
 
 Full documentation: https://docs.rs/saberrs
 
@@ -18,7 +20,7 @@ In `Cargo.toml`:
 
 ```toml
 [dependencies]
-saberrs = "0.3"
+saberrs = "0.4"
 ```
 
 In application code:

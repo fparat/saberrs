@@ -6,6 +6,7 @@ use std::io;
 /// Result type used in the crate.
 pub type Result<T> = std::result::Result<T, Error>;
 
+/// Crate error type
 #[derive(Debug)]
 pub enum Error {
     /// IO error

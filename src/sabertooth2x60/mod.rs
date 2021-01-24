@@ -77,18 +77,28 @@ pub trait Sabertooth2x60 {
     fn get_duty_cycle(&mut self, motor: usize) -> Result<f32>;
 }
 
+/// Combination of error conditions returned by the device.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ErrorConditions(pub u8);
 
 #[rustfmt::skip]
 impl ErrorConditions {
+    /// The raw value returned by the device.
     #[inline] pub fn value(&self)           -> u8   { self.0 }
+    /// If there is no error condition.
     #[inline] pub fn is_ok(&self)           -> bool { self.0 == 0 }
+    /// Overcurrent.
     #[inline] pub fn overcurrent(&self)     -> bool { (self.0 & (1 << 0)) != 0 }
+    /// Overvoltage.
     #[inline] pub fn overvoltage(&self)     -> bool { (self.0 & (1 << 1)) != 0 }
+    /// Overtemperature.
     #[inline] pub fn overtemperature(&self) -> bool { (self.0 & (1 << 2)) != 0 }
+    /// Undervoltage.
     #[inline] pub fn undervoltage(&self)    -> bool { (self.0 & (1 << 3)) != 0 }
+    /// The motor 1 is depowered.
     #[inline] pub fn deadband_1(&self)      -> bool { (self.0 & (1 << 5)) != 0 }
+    /// The motor 2 is depowered.
     #[inline] pub fn deadband_2(&self)      -> bool { (self.0 & (1 << 6)) != 0 }
+    /// In timeout
     #[inline] pub fn timeout(&self)         -> bool { (self.0 & (1 << 7)) != 0 }
 }
