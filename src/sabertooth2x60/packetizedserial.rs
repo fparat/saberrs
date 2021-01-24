@@ -53,10 +53,8 @@ fn ratio_to_0_127(ratio: f32) -> Result<u8> {
 }
 
 fn err_motor<T>(motor: usize) -> Result<T> {
-    Err(Error::InvalidInput(format!(
-        "invalid motor value {}; should be 1 or 2",
-        motor
-    )))
+    let msg = format!("invalid motor value {}; should be 1 or 2", motor);
+    Err(Error::InvalidInput(msg))
 }
 
 #[derive(Debug)]
@@ -260,8 +258,32 @@ impl<T: SabertoothSerial> Sabertooth2x60 for PacketizedSerial<T> {
         Ok(ErrorConditions(value))
     }
 
+    #[allow(non_snake_case)]
     fn get_temperature(&mut self, motor: usize) -> Result<f32> {
-        todo!()
+        let command = match motor {
+            1 => COMMAND_REQ_THERMISTOR_1,
+            2 => COMMAND_REQ_THERMISTOR_2,
+            m => return err_motor(m),
+        };
+        let value = self.get_value(command)?;
+
+        // Thermistor formula:
+        // v = value * 5.0 / 255
+        // v0 = 5.0
+        // r = 1100.0 * v / (v0 - v)
+        // b = 3455.0
+        // r0 = 10000.0
+        // T0 = 298.0
+        // T = b / ln(r / (r0 * exp(-b / T0))) - 273.0
+        // (output is in degrees Celsius)
+        let v = (value as f64) * 5.0 / 255.0;
+        let v0 = 5.0;
+        let r = 1100.0 * v / (v0 - v);
+        let b = 3455.0f64;
+        let r0 = 10000.0f64;
+        let T0 = 298.0f64;
+        let T = b / (r / (r0 * (-b / T0).exp())).ln() - 273.0;
+        Ok(T as f32)
     }
 
     fn get_voltage(&mut self) -> Result<f32> {

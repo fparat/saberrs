@@ -335,3 +335,31 @@ fn test_error_conditions() {
     assert!(!ErrorConditions(0xA5).deadband_2());
     assert!(ErrorConditions(0xA5).timeout());
 }
+
+#[test]
+#[rustfmt::skip]
+fn test_get_temperature() {
+    // TODO
+    // let (mut saber, responder) = saber2x60_responder_harness(128).unwrap();
+    // let vectors = [
+    //     (1, vec![128, 127, 2, 0, 1, 2], vec![1, 0], 0.0),
+    //     (2, vec![128, 127, 2, 0, 2, 2], vec![2, 0], 0.0),
+    // ];
+    // test_get_method!(saber, get_temperature, vectors, responder);
+}
+
+#[allow(non_snake_case)]
+#[test]
+fn test_print_all() {
+    for value in 0..256 {
+        let v = (value as f64) * 5.0 / 255.0;
+        let v0 = 5.0;
+        let r = 1100.0 * v / (v0 - v);
+        let b = 3455.0f64;
+        let r0 = 10000.0f64;
+        let T0 = 298.0f64;
+        let T = b / (r / (r0 * (-b / T0).exp())).ln() - 273.0;
+        println!("{} -> {}", value, T);
+    }
+    //panic!();  // uncomment + cargo test to inspect values
+}
