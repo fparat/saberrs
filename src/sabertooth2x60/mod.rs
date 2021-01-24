@@ -63,4 +63,32 @@ pub trait Sabertooth2x60 {
 
     /// Set the deadband value. *ratio* is the deadband ratio between 0.0 and 1.0.
     fn set_deadband(&mut self, ratio: f32) -> Result<()>;
+
+    /// Get error conditions
+    fn get_errors(&mut self) -> Result<ErrorConditions>;
+
+    /// Get the temperature of a motor, in degrees celsius.
+    fn get_temperature(&mut self, motor: usize) -> Result<f32>;
+
+    /// Get the battery voltage in volts.
+    fn get_voltage(&mut self) -> Result<f32>;
+
+    /// Get the motor duty-cycle. UNSTABLE: unsure about format.
+    fn get_duty_cycle(&mut self) -> Result<f32>;
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ErrorConditions(pub u8);
+
+#[rustfmt::skip]
+impl ErrorConditions {
+    #[inline] pub fn value(&self)           -> u8   { self.0 }
+    #[inline] pub fn is_ok(&self)           -> bool { self.0 == 0 }
+    #[inline] pub fn overcurrent(&self)     -> bool { (self.0 & (1 << 0)) != 0 }
+    #[inline] pub fn overvoltage(&self)     -> bool { (self.0 & (1 << 1)) != 0 }
+    #[inline] pub fn overtemperature(&self) -> bool { (self.0 & (1 << 2)) != 0 }
+    #[inline] pub fn undervoltage(&self)    -> bool { (self.0 & (1 << 3)) != 0 }
+    #[inline] pub fn deadband_1(&self)      -> bool { (self.0 & (1 << 5)) != 0 }
+    #[inline] pub fn deadband_2(&self)      -> bool { (self.0 & (1 << 6)) != 0 }
+    #[inline] pub fn timeout(&self)         -> bool { (self.0 & (1 << 7)) != 0 }
 }

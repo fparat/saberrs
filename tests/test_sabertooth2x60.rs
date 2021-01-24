@@ -1,18 +1,30 @@
 use std::io::Read;
 use std::time::Duration;
 
-use saberrs::sabertooth2x60::{PacketizedSerial, Sabertooth2x60};
+use saberrs::sabertooth2x60::{ErrorConditions, PacketizedSerial, Sabertooth2x60};
 use saberrs::{Result, SabertoothPort};
 use serialport::TTYPort;
 
 #[macro_use]
 mod utils;
 
-/// Return a new SabertoothText, and a TTY for talking to it.
+use utils::{Responder, ResponderController, ResponderType};
+
+/// Return a new Sabertooth, and a TTY for talking to it.
 pub fn saber2x60_harness(address: u8) -> Result<(PacketizedSerial<SabertoothPort>, TTYPort)> {
     let (saber, tty) = utils::saberdevice_harness();
     let pair = (PacketizedSerial::from_serial(saber, address)?, tty);
     Ok(pair)
+}
+
+/// Return a new Sabertooth connected to a responder, and the controller of the responder.
+pub fn saber2x60_responder_harness(
+    address: u8,
+) -> Result<(PacketizedSerial<SabertoothPort>, ResponderController)> {
+    let (dev, tty) = utils::saberdevice_harness();
+    let saber = PacketizedSerial::from_serial(dev, address)?;
+    let responder = Responder::new(Box::new(tty), ResponderType::Checksum).start();
+    Ok((saber, responder))
 }
 
 #[test]
@@ -280,4 +292,46 @@ fn test_set_deadband() {
     saber
         .set_deadband(f32::NEG_INFINITY)
         .expect_err("expected handling of -Inf");
+}
+
+#[test]
+#[rustfmt::skip]
+fn test_get_errors() {
+    let (mut saber, responder) = saber2x60_responder_harness(128).unwrap();
+    let vectors = [
+        (vec![128, 127, 2, 0, 0, 1], vec![0, 0b0000_0000], ErrorConditions(0)),
+        (vec![128, 127, 2, 0, 0, 1], vec![0, 0b0000_0001], ErrorConditions(1)),
+        (vec![128, 127, 2, 0, 0, 1], vec![0, 0b0000_0010], ErrorConditions(2)),
+        (vec![128, 127, 2, 0, 0, 1], vec![0, 0b0000_0100], ErrorConditions(4)),
+        (vec![128, 127, 2, 0, 0, 1], vec![0, 0b0000_1000], ErrorConditions(8)),
+        (vec![128, 127, 2, 0, 0, 1], vec![0, 0b0001_0000], ErrorConditions(16)),
+        (vec![128, 127, 2, 0, 0, 1], vec![0, 0b0010_0000], ErrorConditions(32)),
+        (vec![128, 127, 2, 0, 0, 1], vec![0, 0b0100_0000], ErrorConditions(64)),
+        (vec![128, 127, 2, 0, 0, 1], vec![0, 0b1000_0000], ErrorConditions(128)),
+        (vec![128, 127, 2, 0, 0, 1], vec![0, 0b1010_0110], ErrorConditions(166)),
+    ];
+    test_get_method_no_channel!(saber, get_errors, vectors, responder);
+}
+
+#[test]
+fn test_error_conditions() {
+    assert!(ErrorConditions(0).is_ok());
+    assert!(!ErrorConditions(1).is_ok());
+
+    assert!(ErrorConditions(0x01).overcurrent());
+    assert!(ErrorConditions(0x02).overvoltage());
+    assert!(ErrorConditions(0x04).overtemperature());
+    assert!(ErrorConditions(0x08).undervoltage());
+    assert!(ErrorConditions(0x20).deadband_1());
+    assert!(ErrorConditions(0x40).deadband_2());
+    assert!(ErrorConditions(0x80).timeout());
+
+    assert!(!ErrorConditions(0xA5).is_ok());
+    assert!(ErrorConditions(0xA5).overcurrent());
+    assert!(!ErrorConditions(0xA5).overvoltage());
+    assert!(ErrorConditions(0xA5).overtemperature());
+    assert!(!ErrorConditions(0xA5).undervoltage());
+    assert!(ErrorConditions(0xA5).deadband_1());
+    assert!(!ErrorConditions(0xA5).deadband_2());
+    assert!(ErrorConditions(0xA5).timeout());
 }

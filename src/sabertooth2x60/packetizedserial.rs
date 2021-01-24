@@ -7,7 +7,7 @@ use crate::{Error, Result, SabertoothSerial};
 #[cfg(feature = "serialport")]
 use crate::SabertoothPort;
 
-use super::{Baudrate, Sabertooth2x60};
+use super::{Baudrate, ErrorConditions, Sabertooth2x60};
 
 pub const ADDRESS_MIN: u8 = 128;
 pub const ADDRESS_MAX: u8 = 135;
@@ -30,6 +30,15 @@ pub const COMMAND_SERIAL_TIMEOUT: u8 = 14;
 pub const COMMAND_BAUDRATE: u8 = 15;
 pub const COMMAND_RAMPING: u8 = 16;
 pub const COMMAND_DEADBAND: u8 = 17;
+
+pub const COMMAND_REQ_ERRORS: u8 = 0;
+pub const COMMAND_REQ_THERMISTOR_1: u8 = 1;
+pub const COMMAND_REQ_THERMISTOR_2: u8 = 2;
+pub const COMMAND_REQ_BAT_VOLT: u8 = 3;
+pub const COMMAND_REQ_DUTY_CYCLE_1: u8 = 4;
+pub const COMMAND_REQ_DUTY_CYCLE_2: u8 = 5;
+
+const PACKET_MAX_REPLY_SIZE: usize = 2;
 
 fn address_is_valid(address: u8) -> bool {
     address >= ADDRESS_MIN && address <= ADDRESS_MAX
@@ -89,6 +98,27 @@ impl<T: SabertoothSerial> PacketizedSerial<T> {
     fn make_packet(&self, command: u8, data: u8) -> [u8; 4] {
         let chk = checksum(self.address, command, data);
         [self.address, command, data, chk]
+    }
+
+    fn make_req_packet(&self, command_req: u8) -> [u8; 6] {
+        let chk = ((self.address as u32 + 127 + 2 + 0 + command_req as u32) & 0x7f) as u8;
+        [self.address, 127, 2, 0, command_req, chk]
+    }
+
+    fn get_value(&mut self, command_req: u8) -> Result<u8> {
+        let req = self.make_req_packet(command_req);
+        self.dev.clear_all()?;
+        self.write_frame(&req)?;
+        let mut buf = [0u8; PACKET_MAX_REPLY_SIZE];
+        let resp = &mut buf[..PACKET_MAX_REPLY_SIZE];
+        self.dev.read_exact(resp)?;
+        if buf[0] != command_req {
+            return Err(Error::Response(format!(
+                "Wrong command value {} in reply",
+                command_req
+            )));
+        }
+        Ok(buf[1])
     }
 }
 
@@ -223,5 +253,22 @@ impl<T: SabertoothSerial> Sabertooth2x60 for PacketizedSerial<T> {
         let packet = self.make_packet(COMMAND_DEADBAND, data);
         self.write_frame(&packet)?;
         Ok(())
+    }
+
+    fn get_errors(&mut self) -> Result<ErrorConditions> {
+        let value = self.get_value(COMMAND_REQ_ERRORS)?;
+        Ok(ErrorConditions(value))
+    }
+
+    fn get_temperature(&mut self, motor: usize) -> Result<f32> {
+        todo!()
+    }
+
+    fn get_voltage(&mut self) -> Result<f32> {
+        todo!()
+    }
+
+    fn get_duty_cycle(&mut self) -> Result<f32> {
+        todo!()
     }
 }

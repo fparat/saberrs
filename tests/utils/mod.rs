@@ -9,7 +9,7 @@ use saberrs::sabertooth2x32::{PacketSerial, PacketType, PlainText};
 use saberrs::{SabertoothPort, SabertoothPortShared, SabertoothSerial};
 
 mod responder;
-use responder::*;
+pub use responder::*;
 
 /// Return a (master, slave) tuple. The slave is set to non-exclusive and
 /// can be used to connect a SabertoothDevice, then the master may be used
@@ -124,6 +124,29 @@ macro_rules! test_get_method {
 
             if let Ok(ret) = res {
                 assert_eq_float!(value, ret);
+            }
+
+            if $responder.is_alive() {
+                if let Err(e) = res {
+                    panic!("{}", e);
+                }
+            } else {
+                panic!($responder.join_panic().unwrap_err());
+            }
+        }
+    };
+}
+
+macro_rules! test_get_method_no_channel {
+    ($saber:expr, $getter:ident, $vectors:expr, $responder:expr) => {
+        for (expected, response, value) in $vectors.iter() {
+            $responder.set_expected(expected.as_ref());
+            $responder.set_response(response.as_ref());
+
+            let res = $saber.$getter();
+
+            if let Ok(ret) = res {
+                assert_eq!(value, &ret);
             }
 
             if $responder.is_alive() {
