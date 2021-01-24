@@ -287,7 +287,9 @@ impl<T: SabertoothSerial> Sabertooth2x60 for PacketizedSerial<T> {
     }
 
     fn get_voltage(&mut self) -> Result<f32> {
-        todo!()
+        let value = self.get_value(COMMAND_REQ_BAT_VOLT)?;
+        let volts = value as f32 * (50. / 255.);
+        Ok(volts)
     }
 
     fn get_duty_cycle(&mut self) -> Result<f32> {

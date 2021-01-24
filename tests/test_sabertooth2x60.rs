@@ -343,7 +343,7 @@ fn test_get_temperature() {
     // let (mut saber, responder) = saber2x60_responder_harness(128).unwrap();
     // let vectors = [
     //     (1, vec![128, 127, 2, 0, 1, 2], vec![1, 0], 0.0),
-    //     (2, vec![128, 127, 2, 0, 2, 2], vec![2, 0], 0.0),
+    //     (2, vec![128, 127, 2, 0, 2, 3], vec![2, 0], 0.0),
     // ];
     // test_get_method!(saber, get_temperature, vectors, responder);
 }
@@ -362,4 +362,16 @@ fn test_print_all() {
         println!("{} -> {}", value, T);
     }
     //panic!();  // uncomment + cargo test to inspect values
+}
+
+#[test]
+fn test_get_voltage() {
+    let (mut saber, responder) = saber2x60_responder_harness(130).unwrap();
+    let vectors = [
+        (vec![130, 127, 2, 0, 3, 6], vec![3, 0], 0.0),
+        (vec![130, 127, 2, 0, 3, 6], vec![3, 23], 4.51),
+        (vec![130, 127, 2, 0, 3, 6], vec![3, 100], 19.608),
+        (vec![130, 127, 2, 0, 3, 6], vec![3, 255], 50.0),
+    ];
+    test_get_method_float_no_channel!(saber, get_voltage, vectors, responder);
 }
