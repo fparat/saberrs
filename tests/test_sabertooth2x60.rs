@@ -176,7 +176,30 @@ fn test_set_baudrate() {
 
 #[test]
 fn test_set_ramp() {
-    println!("todo");
+    let (mut saber, mut tty) = saber2x60_harness(134).unwrap();
+    let vectors = [
+        // fast
+        (Duration::from_millis(250), vec![134, 16, 1, 23]),
+        (Duration::from_millis(125), vec![134, 16, 2, 24]),
+        (Duration::from_millis(83), vec![134, 16, 3, 25]),
+        // intermediate
+        (Duration::from_millis(1526), vec![134, 16, 21, 43]),
+        (Duration::from_millis(763), vec![134, 16, 32, 54]),
+        (Duration::from_millis(373), vec![134, 16, 55, 77]),
+        (Duration::from_millis(262), vec![134, 16, 74, 96]), // overlap of lower intermediate with fast
+        // slow
+        (Duration::from_millis(16787), vec![134, 16, 11, 33]),
+        (Duration::from_millis(3357), vec![134, 16, 15, 37]),
+        (Duration::from_millis(1679), vec![134, 16, 20, 42]),
+    ];
+    test_set_method_no_channel!(saber, set_ramp, vectors, tty);
+
+    saber
+        .set_ramp(Duration::from_millis(24))
+        .expect_err("expected out of range");
+    saber
+        .set_ramp(Duration::from_secs(17))
+        .expect_err("expected out of range");
 }
 
 #[test]

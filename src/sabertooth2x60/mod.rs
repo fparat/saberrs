@@ -57,6 +57,8 @@ pub trait Sabertooth2x60 {
 
     /// Set the speed ramping value. This function estimates the command value
     /// that corresponds to the given ramp time according to the manual.
+    /// From the manual it is not clear if zero is an accepted value, so in
+    /// doubt the method allows it.
     fn set_ramp(&mut self, ramp: Duration) -> Result<()>;
 
     /// Set the deadband value. *ratio* is the deadband ratio between 0.0 and 1.0.

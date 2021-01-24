@@ -1,5 +1,7 @@
 #![allow(clippy::manual_range_contains)]
 
+use std::time::Duration;
+
 use crate::{Error, Result, SabertoothSerial};
 
 #[cfg(feature = "serialport")]
@@ -174,8 +176,33 @@ impl<T: SabertoothSerial> Sabertooth2x60 for PacketizedSerial<T> {
         Ok(())
     }
 
+    #[allow(dead_code)]
     fn set_ramp(&mut self, ramp: std::time::Duration) -> Result<()> {
-        todo!()
+        // fast:          0.0256s -> 0.256s,  value = 256 / (1000 * t)
+        // intermediate : 0.240s  -> 1.526s,  value = 10 + (256 / (15.25 * t))
+        // slow :         1.679s  -> 16.787s, value = 10 + (256 / (15.25 * t))
+
+        const SLOW_MAX: Duration = Duration::from_millis(16787); // value 11
+        const SLOW_MIN: Duration = Duration::from_millis(1679); // value 20
+        const INTER_MAX: Duration = Duration::from_millis(1526); // value 21
+        const INTER_MIN: Duration = Duration::from_millis(240); // value 80
+        const FAST_MAX: Duration = Duration::from_millis(256); // value 1
+        const FAST_MIN: Duration = Duration::from_micros(25600); // value 10
+
+        if ramp < FAST_MIN || ramp > SLOW_MAX {
+            let msg = format!("ramp time {:?} out of range", ramp);
+            return Err(Error::InvalidInput(msg));
+        }
+
+        let data = if ramp <= FAST_MAX {
+            (256. / (1000. * ramp.as_secs_f64())).round() as u8
+        } else {
+            (10. + (256. / (15.25 * ramp.as_secs_f64()))).round() as u8
+        };
+
+        let packet = self.make_packet(COMMAND_RAMPING, data);
+        self.write_frame(&packet)?;
+        Ok(())
     }
 
     fn set_deadband(&mut self, ratio: f32) -> Result<()> {
