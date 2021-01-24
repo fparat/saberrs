@@ -63,6 +63,16 @@ fn test_set_drive_motor() {
     saber
         .set_drive_motor(1, 1.1)
         .expect_err("expected out of range error");
+
+    saber
+        .set_drive_motor(1, f32::NAN)
+        .expect_err("expected handling of NaN");
+    saber
+        .set_drive_motor(1, f32::INFINITY)
+        .expect_err("expected handling of +Inf");
+    saber
+        .set_drive_motor(1, f32::NEG_INFINITY)
+        .expect_err("expected handling of -Inf");
 }
 
 #[test]
@@ -82,6 +92,16 @@ fn test_set_min_voltage() {
     saber
         .set_min_voltage(120.1)
         .expect_err("expected out of range error");
+
+    saber
+        .set_min_voltage(f32::NAN)
+        .expect_err("expected handling of NaN");
+    saber
+        .set_min_voltage(f32::INFINITY)
+        .expect_err("expected handling of +Inf");
+    saber
+        .set_min_voltage(f32::NEG_INFINITY)
+        .expect_err("expected handling of -Inf");
 }
 
 #[test]
@@ -101,6 +121,16 @@ fn test_set_max_voltage() {
     saber
         .set_max_voltage(25.1)
         .expect_err("expected out of range error");
+
+    saber
+        .set_max_voltage(f32::NAN)
+        .expect_err("expected handling of NaN");
+    saber
+        .set_max_voltage(f32::INFINITY)
+        .expect_err("expected handling of +Inf");
+    saber
+        .set_max_voltage(f32::NEG_INFINITY)
+        .expect_err("expected handling of -Inf");
 }
 
 #[test]
@@ -121,6 +151,16 @@ fn test_set_drive_mixed() {
     saber
         .set_drive_mixed(-1.1)
         .expect_err("expected out of range error");
+
+    saber
+        .set_drive_mixed(f32::NAN)
+        .expect_err("expected handling of NaN");
+    saber
+        .set_drive_mixed(f32::INFINITY)
+        .expect_err("expected handling of +Inf");
+    saber
+        .set_drive_mixed(f32::NEG_INFINITY)
+        .expect_err("expected handling of -Inf");
 }
 
 #[test]
@@ -141,6 +181,16 @@ fn test_set_turn_mixed() {
     saber
         .set_turn_mixed(-1.1)
         .expect_err("expected out of range error");
+
+    saber
+        .set_turn_mixed(f32::NAN)
+        .expect_err("expected handling of NaN");
+    saber
+        .set_turn_mixed(f32::INFINITY)
+        .expect_err("expected handling of +Inf");
+    saber
+        .set_turn_mixed(f32::NEG_INFINITY)
+        .expect_err("expected handling of -Inf");
 }
 
 #[test]
@@ -220,4 +270,14 @@ fn test_set_deadband() {
     saber
         .set_deadband(1.1)
         .expect_err("expected out of range error");
+
+    saber
+        .set_deadband(f32::NAN)
+        .expect_err("expected handling of NaN");
+    saber
+        .set_deadband(f32::INFINITY)
+        .expect_err("expected handling of +Inf");
+    saber
+        .set_deadband(f32::NEG_INFINITY)
+        .expect_err("expected handling of -Inf");
 }

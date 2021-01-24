@@ -108,6 +108,10 @@ impl<T: SabertoothSerial> Sabertooth2x60 for PacketizedSerial<T> {
     }
 
     fn set_min_voltage(&mut self, volts: f32) -> Result<()> {
+        if !volts.is_finite() {
+            let msg = format!("min voltage {} not a finite value", volts);
+            return Err(Error::InvalidInput(msg));
+        }
         let data = ((volts - 6.) * 5.) as i32;
         if data < 0 || data > 120 {
             let msg = format!("min voltage {} out of range, must within 6-30 volts", volts);
@@ -119,6 +123,10 @@ impl<T: SabertoothSerial> Sabertooth2x60 for PacketizedSerial<T> {
     }
 
     fn set_max_voltage(&mut self, volts: f32) -> Result<()> {
+        if !volts.is_finite() {
+            let msg = format!("max voltage {} not a finite value", volts);
+            return Err(Error::InvalidInput(msg));
+        }
         if volts < 0. || volts > 25. {
             let msg = format!("max voltage {} out of range, must within 0-25 volts", volts);
             return Err(Error::InvalidInput(msg));

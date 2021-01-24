@@ -18,7 +18,7 @@ macro_rules! match_channel_to {
 
 macro_rules! ratio_to_value_range {
     ($ratio: expr, $range_min: expr, $range_max: expr) => {
-        if $ratio > 1.0 || $ratio < -1.0 {
+        if $ratio > 1.0 || $ratio < -1.0 || !$ratio.is_finite() {
             return Err(crate::Error::InvalidInput(format!(
                 "value ({}) out of range -1.0~1.0",
                 $ratio
