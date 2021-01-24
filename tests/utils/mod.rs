@@ -37,51 +37,6 @@ pub fn saberdevice_harness_shared() -> (SabertoothPortShared, TTYPort) {
     (saber, master)
 }
 
-/// Return a new SabertoothText, and a TTY for talking to it.
-pub fn sabertext_harness() -> (PlainText<SabertoothPort>, TTYPort) {
-    let (saber, tty) = saberdevice_harness();
-    (PlainText::from(saber), tty)
-}
-
-/// Return a new SabertoothPacket (checksum), and a TTY for talking to it.
-pub fn saberchecksum_harness() -> (PacketSerial<SabertoothPort>, TTYPort) {
-    let (saber, tty) = saberdevice_harness();
-    (
-        PacketSerial::from(saber).with_packet_type(PacketType::Checksum),
-        tty,
-    )
-}
-
-/// Return a new SabertoothPacket (CRC), and a TTY for talking to it.
-pub fn sabercrc_harness() -> (PacketSerial<SabertoothPort>, TTYPort) {
-    let (saber, tty) = saberchecksum_harness();
-    (saber.with_packet_type(PacketType::CRC), tty)
-}
-
-pub fn sabertext_responder_harness() -> (PlainText<SabertoothPort>, ResponderController) {
-    let (sabertext, tty) = sabertext_harness();
-    (
-        sabertext,
-        Responder::new(Box::new(tty), ResponderType::Text).start(),
-    )
-}
-
-pub fn saberchecksum_responder_harness() -> (PacketSerial<SabertoothPort>, ResponderController) {
-    let (saberchecksum, tty) = saberchecksum_harness();
-    (
-        saberchecksum,
-        Responder::new(Box::new(tty), ResponderType::Checksum).start(),
-    )
-}
-
-pub fn sabercrc_responder_harness() -> (PacketSerial<SabertoothPort>, ResponderController) {
-    let (saber, tty) = sabercrc_harness();
-    (
-        saber.with_packet_type(PacketType::CRC),
-        Responder::new(Box::new(tty), ResponderType::CRC).start(),
-    )
-}
-
 /// Float equality assertion that is good enough for our use-case
 #[macro_export]
 macro_rules! assert_eq_float {

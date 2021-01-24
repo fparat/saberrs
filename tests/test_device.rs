@@ -1,6 +1,7 @@
 use std::io::{Read, Write};
 use std::time::{Duration, Instant};
 
+use saberrs::sabertooth2x32::{PacketSerial, PlainText, Sabertooth2x32};
 use saberrs::SabertoothSerial;
 
 mod utils;
@@ -74,4 +75,17 @@ fn timeout_actual() {
     do_timeout(Duration::from_millis(5));
     do_timeout(Duration::from_millis(50));
     do_timeout(Duration::from_millis(100));
+}
+
+#[test]
+#[allow(unused)]
+fn instantiate_multiple_protocols() {
+    let (mut dev, tty) = utils::saberdevice_harness_shared();
+    let mut sabertext = PlainText::from(&dev);
+    let mut saberchecksum = PacketSerial::from(&dev);
+    dev.write_all(b"gibberish").expect("Raw interface failed");
+    sabertext.set_speed(1, 0.2).expect("Text interface failed");
+    saberchecksum
+        .set_speed(1, 0.2)
+        .expect("Checksum interface failed");
 }

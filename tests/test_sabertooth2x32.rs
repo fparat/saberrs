@@ -1,11 +1,261 @@
 use std::io::Read;
 
-use serialport::SerialPort;
+use serialport::{SerialPort, TTYPort};
 
-use saberrs::sabertooth2x32::Sabertooth2x32;
+use saberrs::sabertooth2x32::{PacketSerial, PacketType, PlainText, Sabertooth2x32};
+use saberrs::SabertoothPort;
 
 #[macro_use]
 mod utils;
+
+use utils::{Responder, ResponderController, ResponderType};
+
+/// Return a new SabertoothText, and a TTY for talking to it.
+pub fn sabertext_harness() -> (PlainText<SabertoothPort>, TTYPort) {
+    let (saber, tty) = utils::saberdevice_harness();
+    (PlainText::from(saber), tty)
+}
+
+/// Return a new SabertoothPacket (checksum), and a TTY for talking to it.
+pub fn saberchecksum_harness() -> (PacketSerial<SabertoothPort>, TTYPort) {
+    let (saber, tty) = utils::saberdevice_harness();
+    (
+        PacketSerial::from(saber).with_packet_type(PacketType::Checksum),
+        tty,
+    )
+}
+
+/// Return a new SabertoothPacket (CRC), and a TTY for talking to it.
+pub fn sabercrc_harness() -> (PacketSerial<SabertoothPort>, TTYPort) {
+    let (saber, tty) = saberchecksum_harness();
+    (saber.with_packet_type(PacketType::CRC), tty)
+}
+
+pub fn sabertext_responder_harness() -> (PlainText<SabertoothPort>, ResponderController) {
+    let (sabertext, tty) = sabertext_harness();
+    (
+        sabertext,
+        Responder::new(Box::new(tty), ResponderType::Text).start(),
+    )
+}
+
+pub fn saberchecksum_responder_harness() -> (PacketSerial<SabertoothPort>, ResponderController) {
+    let (saberchecksum, tty) = saberchecksum_harness();
+    (
+        saberchecksum,
+        Responder::new(Box::new(tty), ResponderType::Checksum).start(),
+    )
+}
+
+pub fn sabercrc_responder_harness() -> (PacketSerial<SabertoothPort>, ResponderController) {
+    let (saber, tty) = sabercrc_harness();
+    (
+        saber.with_packet_type(PacketType::CRC),
+        Responder::new(Box::new(tty), ResponderType::CRC).start(),
+    )
+}
+
+mod plaintext {
+    use super::*;
+
+    #[test]
+    fn startup() {
+        let (mut sabertext, mut tty) = sabertext_harness();
+
+        sabertext.startup(1).expect("Startup failure");
+        let mut buf = [0u8; 32];
+        let read_len = tty.read(&mut buf).expect("Read fail");
+        let expected = b"M1: startup\r\n";
+        assert_eq!(expected.len(), read_len);
+        assert_eq!(expected, &buf[0..expected.len()]);
+
+        sabertext.startup(0).expect_err("Channel 0 should fail");
+    }
+
+    #[test]
+    fn shutdown() {
+        let (mut sabertext, mut tty) = sabertext_harness();
+
+        sabertext.shutdown(2).expect("Startup failure");
+        let mut buf = [0u8; 32];
+        let read_len = tty.read(&mut buf).expect("Read fail");
+        let expected = b"M2: shutdown\r\n";
+        assert_eq!(expected.len(), read_len);
+        assert_eq!(expected, &buf[0..expected.len()]);
+    }
+
+    #[test]
+    fn set_speed() {
+        let vectors = [
+            (1, -1.0, b"M1: -2047\r\n".to_vec()),
+            (2, -0.5, b"M2: -1023\r\n".to_vec()),
+            (2, -0.2, b"M2: -409\r\n".to_vec()),
+            (1, 0.0, b"M1: 0\r\n".to_vec()),
+            (1, 0.25, b"M1: 511\r\n".to_vec()),
+            (2, 0.5, b"M2: 1023\r\n".to_vec()),
+            (1, 0.75, b"M1: 1535\r\n".to_vec()),
+            (2, 1.0, b"M2: 2047\r\n".to_vec()),
+        ];
+
+        let (mut sabertext, mut tty) = sabertext_harness();
+        test_set_method!(sabertext, set_speed, vectors, tty);
+    }
+
+    #[test]
+#[rustfmt::skip]
+fn set_speed_errs() {
+    let (mut sabertext, tty) = sabertext_harness();
+    sabertext.set_speed(0, 0.0).expect_err("Channel <1 should fail");
+    sabertext.set_speed(3, 0.0).expect_err("Channel >2 should fail");
+    sabertext.set_speed(1, 1.0001).expect_err("Values >1.000 should fail");
+    sabertext.set_speed(1, -1.0001).expect_err("Values <-1.000 should fail");
+
+    // nothing should have been sent over serial
+    assert_eq!(0, tty.bytes_to_read().unwrap());
+}
+
+    #[test]
+    fn set_drive() {
+        let vectors = [
+            (-0.5, b"MD: -1023\r\n".to_vec()),
+            (1.000, b"MD: 2047\r\n".to_vec()),
+        ];
+
+        let (mut sabertext, mut tty) = sabertext_harness();
+        test_set_method_no_channel!(sabertext, set_drive, vectors, tty);
+    }
+
+    #[test]
+    fn set_turn() {
+        let vectors = [
+            (-1.000, b"MT: -2047\r\n".to_vec()),
+            (0.25, b"MT: 511\r\n".to_vec()),
+        ];
+        let (mut sabertext, mut tty) = sabertext_harness();
+        test_set_method_no_channel!(sabertext, set_turn, vectors, tty);
+    }
+
+    #[test]
+    fn set_power() {
+        let vectors = [
+            (1, -1.000, b"P1: -2047\r\n".to_vec()),
+            (2, -0.5, b"P2: -1023\r\n".to_vec()),
+            (1, 0.0, b"P1: 0\r\n".to_vec()),
+            (1, 0.25, b"P1: 511\r\n".to_vec()),
+            (2, 0.5, b"P2: 1023\r\n".to_vec()),
+            (1, 0.75, b"P1: 1535\r\n".to_vec()),
+            (2, 1.000, b"P2: 2047\r\n".to_vec()),
+        ];
+
+        let (mut sabertext, mut tty) = sabertext_harness();
+        test_set_method!(sabertext, set_power, vectors, tty);
+    }
+
+    #[test]
+    fn set_ramp() {
+        let vectors = [
+            (1, -1.000, b"R1: -2047\r\n".to_vec()),
+            (2, -0.5, b"R2: -1023\r\n".to_vec()),
+            (1, 0.0, b"R1: 0\r\n".to_vec()),
+            (1, 0.25, b"R1: 511\r\n".to_vec()),
+            (2, 0.5, b"R2: 1023\r\n".to_vec()),
+            (1, 0.75, b"R1: 1535\r\n".to_vec()),
+            (2, 1.000, b"R2: 2047\r\n".to_vec()),
+        ];
+
+        let (mut sabertext, mut tty) = sabertext_harness();
+        test_set_method!(sabertext, set_ramp, vectors, tty);
+    }
+
+    #[test]
+    fn set_aux() {
+        let vectors = [
+            (1, -1.000, b"Q1: -2047\r\n".to_vec()),
+            (2, -0.5, b"Q2: -1023\r\n".to_vec()),
+            (1, 0.0, b"Q1: 0\r\n".to_vec()),
+            (1, 0.25, b"Q1: 511\r\n".to_vec()),
+            (2, 0.5, b"Q2: 1023\r\n".to_vec()),
+            (1, 0.75, b"Q1: 1535\r\n".to_vec()),
+            (2, 1.000, b"Q2: 2047\r\n".to_vec()),
+        ];
+
+        let (mut sabertext, mut tty) = sabertext_harness();
+        test_set_method!(sabertext, set_aux, vectors, tty);
+    }
+
+    #[test]
+    fn get_speed() {
+        #[rustfmt::skip]
+    let vectors = [
+        (1, b"M1: get\r\n".to_vec(), b"M1: 1256\r\n".to_vec(), 0.61358),
+        (2, b"M2: get\r\n".to_vec(), b"M2: -2047\r\n".to_vec(), -1.000),
+    ];
+
+        let (mut sabertext, responder) = sabertext_responder_harness();
+        test_get_method_float_with_channel!(sabertext, get_speed, vectors, responder);
+        responder.stop();
+    }
+
+    #[test]
+    fn get_power() {
+        #[rustfmt::skip]
+    let vectors = [
+        (1, b"P1: get\r\n".to_vec(), b"P1: -1000\r\n".to_vec(), -0.48852),
+        (2, b"P2: get\r\n".to_vec(), b"P2: 2047\r\n".to_vec(), 1.000),
+    ];
+
+        let (mut sabertext, responder) = sabertext_responder_harness();
+        test_get_method_float_with_channel!(sabertext, get_power, vectors, responder);
+        responder.stop();
+    }
+
+    #[test]
+    fn get_voltage() {
+        #[rustfmt::skip]
+    let vectors = [
+        (1, b"M1: getb\r\n".to_vec(), b"M1: B125\r\n".to_vec(), 12.5),
+        (2, b"M2: getb\r\n".to_vec(), b"M2:B240\r\n".to_vec(), 24.0),
+    ];
+
+        let (mut sabertext, responder) = sabertext_responder_harness();
+        test_get_method_float_with_channel!(sabertext, get_voltage, vectors, responder);
+        responder.stop();
+    }
+
+    #[test]
+    fn get_current() {
+        #[rustfmt::skip]
+    let vectors = [
+        (1, b"M1: getc\r\n".to_vec(), b"M1: C320\r\n".to_vec(), 32.0),
+        (2, b"M2: getc\r\n".to_vec(), b"M2:C-20\r\n".to_vec(), -2.0),
+    ];
+
+        let (mut sabertext, responder) = sabertext_responder_harness();
+        test_get_method_float_with_channel!(sabertext, get_current, vectors, responder);
+        responder.stop();
+    }
+
+    #[test]
+    fn get_temperature() {
+        #[rustfmt::skip]
+    let vectors = [
+        (1, b"M1: gett\r\n".to_vec(), b"M1: T30\r\n".to_vec(), 30.0),
+        (2, b"M2: gett\r\n".to_vec(), b"M2:T85\r\n".to_vec(), 85.0),
+    ];
+
+        let (mut sabertext, responder) = sabertext_responder_harness();
+        test_get_method_float_with_channel!(sabertext, get_temperature, vectors, responder);
+        responder.stop();
+    }
+
+    #[cfg(feature = "serialport")]
+    #[test]
+    fn test_from_serialport() {
+        use saberrs::sabertooth2x32::PlainText;
+        let (saber, _) = utils::saberdevice_harness();
+        let _ = PlainText::from(saber);
+    }
+}
 
 mod checksum {
     use super::*;
@@ -13,7 +263,7 @@ mod checksum {
     #[test]
     #[rustfmt::skip]
     fn startup() {
-        let (mut saberchecksum, mut tty) = utils::saberchecksum_harness();
+        let (mut saberchecksum, mut tty) = saberchecksum_harness();
         let mut buf = [0u8; 32];
 
         saberchecksum.startup(1).expect("Startup failure");
@@ -35,7 +285,7 @@ mod checksum {
     #[test]
     #[rustfmt::skip]
     fn shutdown() {
-        let (mut saberchecksum, mut tty) = utils::saberchecksum_harness();
+        let (mut saberchecksum, mut tty) = saberchecksum_harness();
         let mut buf = [0u8; 32];
 
         saberchecksum.shutdown(1).expect("Startup failure");
@@ -71,14 +321,14 @@ mod checksum {
             (2, 1.0, b"\x80\x28\x00\x28\x7f\x0f\x4d\x32\x0d".to_vec()),
         ];
 
-        let (mut saberchecksum, mut tty) = utils::saberchecksum_harness();
+        let (mut saberchecksum, mut tty) = saberchecksum_harness();
         test_set_method!(saberchecksum, set_speed, vectors, tty);
     }
 
     #[test]
     #[rustfmt::skip]
     fn set_speed_errs() {
-        let (mut saberchecksum, tty) = utils::saberchecksum_harness();
+        let (mut saberchecksum, tty) = saberchecksum_harness();
         saberchecksum.set_speed(0, 0.0).expect_err("Channel <1 should fail");
         saberchecksum.set_speed(3, 0.0).expect_err("Channel >2 should fail");
         saberchecksum.set_speed(1, 1.01).expect_err("Values >100.0 should fail");
@@ -96,7 +346,7 @@ mod checksum {
             (1.0, b"\x80\x28\x00\x28\x7f\x0f\x4d\x44\x1f".to_vec()),
         ];
 
-        let (mut saberchecksum, mut tty) = utils::saberchecksum_harness();
+        let (mut saberchecksum, mut tty) = saberchecksum_harness();
         test_set_method_no_channel!(saberchecksum, set_drive, vectors, tty);
     }
 
@@ -107,7 +357,7 @@ mod checksum {
             (-1.0, b"\x80\x28\x01\x29\x7f\x0f\x4d\x54\x2f".to_vec()),
             (0.25, b"\x80\x28\x00\x28\x7f\x03\x4d\x54\x23".to_vec()),
         ];
-        let (mut saberchecksum, mut tty) = utils::saberchecksum_harness();
+        let (mut saberchecksum, mut tty) = saberchecksum_harness();
         test_set_method_no_channel!(saberchecksum, set_turn, vectors, tty);
     }
 
@@ -116,7 +366,7 @@ mod checksum {
     fn set_power() {
         let vectors = [(1, -1.0, b"\x80\x28\x01\x29\x7f\x0f\x50\x31\x0f".to_vec())];
 
-        let (mut saberchecksum, mut tty) = utils::saberchecksum_harness();
+        let (mut saberchecksum, mut tty) = saberchecksum_harness();
         test_set_method!(saberchecksum, set_power, vectors, tty);
     }
 
@@ -125,7 +375,7 @@ mod checksum {
     fn set_ramp() {
         let vectors = [(1, 0.25, b"\x80\x28\x00\x28\x7f\x03\x52\x31\x05".to_vec())];
 
-        let (mut saberchecksum, mut tty) = utils::saberchecksum_harness();
+        let (mut saberchecksum, mut tty) = saberchecksum_harness();
         test_set_method!(saberchecksum, set_ramp, vectors, tty);
     }
 
@@ -134,7 +384,7 @@ mod checksum {
     fn set_aux() {
         let vectors = [(2, 0.5, b"\x80\x28\x00\x28\x7f\x07\x51\x32\x09".to_vec())];
 
-        let (mut saberchecksum, mut tty) = utils::saberchecksum_harness();
+        let (mut saberchecksum, mut tty) = saberchecksum_harness();
         test_set_method!(saberchecksum, set_aux, vectors, tty);
     }
 
@@ -147,7 +397,7 @@ mod checksum {
             (2, b"\x80\x29\x00\x29\x4D\x32\x7F".to_vec(), b"\x80\x49\x01\x4A\x2E\x08\x4D\x32\x35".to_vec(), -0.522_716),
         ];
 
-        let (mut saberchecksum, responder) = utils::saberchecksum_responder_harness();
+        let (mut saberchecksum, responder) = saberchecksum_responder_harness();
         test_get_method_float_with_channel!(saberchecksum, get_speed, vectors, responder);
         responder.stop();
     }
@@ -161,7 +411,7 @@ mod checksum {
             (2, b"\x80\x29\x10\x39\x4D\x32\x7F".to_vec(), b"\x80\x49\x10\x59\x78\x00\x4D\x32\x77".to_vec(), 12.0),
         ];
 
-        let (mut saberchecksum, responder) = utils::saberchecksum_responder_harness();
+        let (mut saberchecksum, responder) = saberchecksum_responder_harness();
         test_get_method_float_with_channel!(saberchecksum, get_voltage, vectors, responder);
         responder.stop();
     }
@@ -175,7 +425,7 @@ mod checksum {
             (2, b"\x80\x29\x20\x49\x4D\x32\x7F".to_vec(), b"\x80\x49\x20\x69\x03\x00\x4D\x32\x02".to_vec(), 3.0),
         ];
 
-        let (mut saberchecksum, responder) = utils::saberchecksum_responder_harness();
+        let (mut saberchecksum, responder) = saberchecksum_responder_harness();
         test_get_method_float_with_channel!(saberchecksum, get_current, vectors, responder);
         responder.stop();
     }
@@ -189,7 +439,7 @@ mod checksum {
             (2, b"\x80\x29\x40\x69\x4D\x32\x7F".to_vec(), b"\x80\x49\x40\x09\x1D\x00\x4D\x32\x1C".to_vec(), 29.0),
         ];
 
-        let (mut saberchecksum, responder) = utils::saberchecksum_responder_harness();
+        let (mut saberchecksum, responder) = saberchecksum_responder_harness();
         test_get_method_float_with_channel!(saberchecksum, get_temperature, vectors, responder);
         responder.stop();
     }
@@ -201,7 +451,7 @@ mod crc {
     #[test]
     #[rustfmt::skip]
     fn startup() {
-        let (mut sabercrc, mut tty) = utils::sabercrc_harness();
+        let (mut sabercrc, mut tty) = sabercrc_harness();
         let mut buf = [0u8; 32];
 
         sabercrc.startup(1).expect("Startup failure");
@@ -223,7 +473,7 @@ mod crc {
     #[test]
     #[rustfmt::skip]
     fn shutdown() {
-        let (mut sabercrc, mut tty) = utils::sabercrc_harness();
+        let (mut sabercrc, mut tty) = sabercrc_harness();
         let mut buf = [0u8; 32];
 
         sabercrc.shutdown(1).expect("Startup failure");
@@ -255,14 +505,14 @@ mod crc {
             (2,  1.0,  b"\xf0\x28\x00\x0c\x7f\x0f\x4d\x32\x23\x2b".to_vec()),
         ];
 
-        let (mut sabercrc, mut tty) = utils::sabercrc_harness();
+        let (mut sabercrc, mut tty) = sabercrc_harness();
         test_set_method!(sabercrc, set_speed, vectors, tty);
     }
 
     #[test]
     #[rustfmt::skip]
     fn set_speed_errs() {
-        let (mut sabercrc, tty) = utils::sabercrc_harness();
+        let (mut sabercrc, tty) = sabercrc_harness();
         sabercrc.set_speed(0, 0.0).expect_err("Channel <1 should fail");
         sabercrc.set_speed(3, 0.0).expect_err("Channel >2 should fail");
         sabercrc.set_speed(1, 1.0001).expect_err("Values >100.0 should fail");
@@ -280,7 +530,7 @@ mod crc {
             (1.0,  b"\xf0\x28\x00\x0c\x7f\x0f\x4d\x44\x5d\x31".to_vec()),
         ];
 
-        let (mut sabercrc, mut tty) = utils::sabercrc_harness();
+        let (mut sabercrc, mut tty) = sabercrc_harness();
         test_set_method_no_channel!(sabercrc, set_drive, vectors, tty);
     }
 
@@ -291,7 +541,7 @@ mod crc {
             (-1.0, b"\xF0\x28\x01\x20\x7f\x0f\x4d\x54\x03\x39".to_vec()),
             (0.25, b"\xF0\x28\x00\x0c\x7f\x03\x4d\x54\x26\x5d".to_vec()),
         ];
-        let (mut sabercrc, mut tty) = utils::sabercrc_harness();
+        let (mut sabercrc, mut tty) = sabercrc_harness();
         test_set_method_no_channel!(sabercrc, set_turn, vectors, tty);
     }
 
@@ -300,7 +550,7 @@ mod crc {
     fn set_power() {
         let vectors = [(1, -1.0, b"\xf0\x28\x01\x20\x7f\x0f\x50\x31\x6e\x1a".to_vec())];
 
-        let (mut sabercrc, mut tty) = utils::sabercrc_harness();
+        let (mut sabercrc, mut tty) = sabercrc_harness();
         test_set_method!(sabercrc, set_power, vectors, tty);
     }
 
@@ -309,7 +559,7 @@ mod crc {
     fn set_ramp() {
         let vectors = [(1, 0.25, b"\xf0\x28\x00\x0c\x7f\x03\x52\x31\x0a\x6e".to_vec())];
 
-        let (mut sabercrc, mut tty) = utils::sabercrc_harness();
+        let (mut sabercrc, mut tty) = sabercrc_harness();
         test_set_method!(sabercrc, set_ramp, vectors, tty);
     }
 
@@ -318,7 +568,7 @@ mod crc {
     fn set_aux() {
         let vectors = [(2, 0.5, b"\xf0\x28\x00\x0c\x7f\x07\x51\x32\x0a\x00".to_vec())];
 
-        let (mut sabercrc, mut tty) = utils::sabercrc_harness();
+        let (mut sabercrc, mut tty) = sabercrc_harness();
         test_set_method!(sabercrc, set_aux, vectors, tty);
     }
 
@@ -331,7 +581,7 @@ mod crc {
             (2, b"\xF0\x29\x00\x6D\x4D\x32\x74\x34".to_vec(), b"\xF0\x49\x01\x39\x6B\x05\x4D\x32\x4C\x58".to_vec(), -0.364_924_28),
         ];
 
-        let (mut sabercrc, responder) = utils::sabercrc_responder_harness();
+        let (mut sabercrc, responder) = sabercrc_responder_harness();
         test_get_method_float_with_channel!(sabercrc, get_speed, vectors, responder);
         responder.stop();
     }
@@ -345,7 +595,7 @@ mod crc {
             (2, b"\xF0\x29\x10\x2E\x4D\x32\x74\x34".to_vec(), b"\xF0\x49\x10\x56\x78\x00\x4D\x32\x26\x1A".to_vec(), 12.0),
         ];
 
-        let (mut sabercrc, responder) = utils::sabercrc_responder_harness();
+        let (mut sabercrc, responder) = sabercrc_responder_harness();
         test_get_method_float_with_channel!(sabercrc, get_voltage, vectors, responder);
         responder.stop();
     }
@@ -359,7 +609,7 @@ mod crc {
             (2, b"\xF0\x29\x20\x06\x4D\x32\x74\x34".to_vec(), b"\xF0\x49\x20\x7E\x12\x00\x4D\x32\x30\x3C".to_vec(), 18.0),
         ];
 
-        let (mut sabercrc, responder) = utils::sabercrc_responder_harness();
+        let (mut sabercrc, responder) = sabercrc_responder_harness();
         test_get_method_float_with_channel!(sabercrc, get_current, vectors, responder);
         responder.stop();
     }
@@ -373,7 +623,7 @@ mod crc {
             (2, b"\xF0\x29\x40\x56\x4D\x32\x74\x34".to_vec(), b"\xF0\x49\x40\x2E\x1D\x00\x4D\x32\x2E\x14".to_vec(), 29.0),
         ];
 
-        let (mut sabercrc, responder) = utils::sabercrc_responder_harness();
+        let (mut sabercrc, responder) = sabercrc_responder_harness();
         test_get_method_float_with_channel!(sabercrc, get_temperature, vectors, responder);
         responder.stop();
     }
