@@ -18,7 +18,7 @@ pub enum Error {
     Response(String),
 
     /// Other error
-    Other,
+    Other(String),
 
     /// Serial error. Its embedded kind is defined by the `serialport` crate.
     #[cfg(feature = "serialport")]
@@ -31,7 +31,7 @@ impl fmt::Display for Error {
             Error::Io(e) => write!(fmt, "IO error: {}", e),
             Error::InvalidInput(msg) => write!(fmt, "Invalid input: {}", msg),
             Error::Response(msg) => write!(fmt, "Invalid response from Sabertooth: {}", msg),
-            Error::Other => write!(fmt, "Other saberrs error"),
+            Error::Other(msg) => write!(fmt, "Other saberrs error: {}", msg),
 
             #[cfg(feature = "serialport")]
             Error::Serial(e) => write!(fmt, "serialport error: {}", e),
@@ -45,7 +45,7 @@ impl std::error::Error for Error {
             Error::Io(e) => Some(e),
             Error::InvalidInput(_) => None,
             Error::Response(_) => None,
-            Error::Other => None,
+            Error::Other(_) => None,
             Error::Serial(e) => Some(e),
         }
     }

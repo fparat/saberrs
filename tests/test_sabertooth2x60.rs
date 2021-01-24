@@ -375,3 +375,8 @@ fn test_get_voltage() {
     ];
     test_get_method_float_no_channel!(saber, get_voltage, vectors, responder);
 }
+
+#[test]
+fn test_get_duty_cycle() {
+    // TODO
+}

@@ -74,7 +74,7 @@ pub trait Sabertooth2x60 {
     fn get_voltage(&mut self) -> Result<f32>;
 
     /// Get the motor duty-cycle. UNSTABLE: unsure about format.
-    fn get_duty_cycle(&mut self) -> Result<f32>;
+    fn get_duty_cycle(&mut self, motor: usize) -> Result<f32>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

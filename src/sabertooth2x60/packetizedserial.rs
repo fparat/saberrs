@@ -292,7 +292,7 @@ impl<T: SabertoothSerial> Sabertooth2x60 for PacketizedSerial<T> {
         Ok(volts)
     }
 
-    fn get_duty_cycle(&mut self) -> Result<f32> {
-        todo!()
+    fn get_duty_cycle(&mut self, motor: usize) -> Result<f32> {
+        Err(Error::Other("not implemented".to_string()))
     }
 }
