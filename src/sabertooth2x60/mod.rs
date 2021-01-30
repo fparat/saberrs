@@ -73,7 +73,9 @@ pub trait Sabertooth2x60 {
     /// Get the battery voltage in volts.
     fn get_voltage(&mut self) -> Result<f32>;
 
-    /// Get the motor duty-cycle. UNSTABLE: unsure about format.
+    /// Get the motor duty-cycle.
+    /// UNSTABLE: unsure about format, currently return the raw value, but it
+    /// will likely change in future versions.
     fn get_duty_cycle(&mut self, motor: usize) -> Result<f32>;
 }
 

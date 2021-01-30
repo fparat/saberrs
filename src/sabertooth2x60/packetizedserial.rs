@@ -296,6 +296,12 @@ impl<T: SabertoothSerial> Sabertooth2x60 for PacketizedSerial<T> {
     }
 
     fn get_duty_cycle(&mut self, motor: usize) -> Result<f32> {
-        Err(Error::Other("not implemented".to_string()))
+        let command = match motor {
+            1 => COMMAND_REQ_DUTY_CYCLE_1,
+            2 => COMMAND_REQ_DUTY_CYCLE_2,
+            m => return err_motor(m),
+        };
+        let value = self.get_value(command)?;
+        Ok(value as f32) // todo: conversion
     }
 }
